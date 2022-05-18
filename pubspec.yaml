@@ -1,13 +1,18 @@
 name: dage
-description: A sample command-line application.
-version: 1.0.0
-# homepage: https://www.example.com
+description: Age Encryption implementation in Dart.
+version: 0.0.1
+homepage: https://github.com/Producement/dage
 
 environment:
   sdk: '>=2.17.0 <3.0.0'
 
-# dependencies:
-#   path: ^1.8.0
+dependencies:
+  args: ^2.3.1
+  bech32: ^0.2.1
+  collection: ^1.16.0
+  convert: ^3.0.1
+  cryptography: ^2.0.5
+  logging: ^1.0.2
 
 dev_dependencies:
   lints: ^2.0.0
