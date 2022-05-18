@@ -4,6 +4,7 @@ import 'dart:typed_data';
 
 import 'package:collection/collection.dart';
 import 'package:cryptography/cryptography.dart';
+import 'package:dage/src/scrypt.dart';
 import 'package:logging/logging.dart';
 
 import 'header.dart';
@@ -16,8 +17,10 @@ import 'util.dart';
 class AgeFile {
   static final Logger logger = Logger('AgeFile');
   final Uint8List _content;
+  final PassphraseProvider passphraseProvider;
 
-  AgeFile(this._content);
+  AgeFile(this._content,
+      {this.passphraseProvider = const PassphraseProvider()});
 
   Uint8List get content => _content;
 
@@ -28,7 +31,8 @@ class AgeFile {
         .first
         .join('\n');
 
-    final header = AgeHeader.parse(rawHeader);
+    final header = await AgeHeader.parse(rawHeader,
+        passphraseProvider: passphraseProvider);
     Uint8List? symmetricFileKey;
     logger.fine(
         'We have ${keyPairs.length} keypairs and ${header.stanzas.length} stanzas');
@@ -49,6 +53,45 @@ class AgeFile {
     final payload = _content.skip(rawHeader.length + 1);
     return _decryptPayload(Uint8List.fromList(payload.toList()),
         symmetricFileKey: symmetricFileKey);
+  }
+
+  Future<Uint8List> decryptWithPassphrase() async {
+    final rawHeader = String.fromCharCodes(_content)
+        .split('\n')
+        .splitAfter((element) => element.startsWith('---'))
+        .first
+        .join('\n');
+
+    final header = await AgeHeader.parse(rawHeader,
+        passphraseProvider: passphraseProvider);
+    if (header.stanzas.length != 1) {
+      throw Exception('Only one recipient allowed!');
+    }
+    final stanza = header.stanzas.first;
+    Uint8List symmetricFileKey = await stanza.decryptedFileKey(null);
+    await header.checkMac(symmetricFileKey);
+    final payload = _content.skip(rawHeader.length + 1);
+    return _decryptPayload(Uint8List.fromList(payload.toList()),
+        symmetricFileKey: symmetricFileKey);
+  }
+
+  static Future<AgeFile> encryptWithPassphrase(Uint8List payload,
+      {AgeRandom random = const AgeRandom(),
+      PassphraseProvider passphraseProvider =
+          const PassphraseProvider()}) async {
+    logger.fine('Encrypting to a passphrase');
+    final symmetricFileKey = random.bytes(16);
+    final stanza = await AgePlugin.passphraseStanzaCreate(
+        symmetricFileKey, random.bytes(16), passphraseProvider);
+    final header = await AgeHeader.create([stanza], symmetricFileKey);
+    final payloadNonce = random.bytes(16);
+    return AgeFile(
+        Uint8List.fromList((await header.serialize()).codeUnits +
+            '\n'.codeUnits +
+            await _encryptPayload(payload,
+                symmetricFileKey: symmetricFileKey,
+                payloadNonce: payloadNonce)),
+        passphraseProvider: passphraseProvider);
   }
 
   static Future<AgeFile> encrypt(

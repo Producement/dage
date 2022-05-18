@@ -5,6 +5,7 @@ import 'package:convert/convert.dart';
 import 'package:cryptography/cryptography.dart';
 import 'package:dage/src/keypair.dart';
 import 'package:dage/src/random.dart';
+import 'package:dage/src/scrypt.dart';
 import 'package:logging/logging.dart';
 
 final recipient = AgeRecipient.fromBech32(
@@ -36,4 +37,9 @@ class ConstAgeRandom implements AgeRandom {
   Uint8List bytes(int length) {
     return Uint8List.fromList(List.generate(length, (index) => 0x01));
   }
+}
+
+class ConstantPassphraseProvider implements PassphraseProvider {
+  @override
+  String passphrase() => '12345678';
 }

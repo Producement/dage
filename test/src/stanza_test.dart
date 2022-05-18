@@ -20,7 +20,7 @@ void main() {
   });
 
   test('parse age recipient stanza', () async {
-    final parsed = AgeStanza.parse(serializedStanza);
+    final parsed = await AgeStanza.parse(serializedStanza);
     expect(parsed.runtimeType, equals(X25519AgeStanza));
     expect(await parsed.serialize(), equals(serializedStanza));
   });

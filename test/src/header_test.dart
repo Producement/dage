@@ -23,7 +23,7 @@ void main() {
   });
 
   test('parse header', () async {
-    final header = AgeHeader.parse(serialised);
+    final header = await AgeHeader.parse(serialised);
     expect(await header.serialize(), equals(serialised));
   });
 
