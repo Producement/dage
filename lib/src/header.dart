@@ -4,6 +4,7 @@ import 'dart:typed_data';
 
 import 'package:collection/collection.dart';
 import 'package:cryptography/cryptography.dart';
+import 'package:dage/src/scrypt.dart';
 import 'package:logging/logging.dart';
 
 import 'stanza.dart';
@@ -28,7 +29,9 @@ class AgeHeader {
     return AgeHeader._(stanzas, mac);
   }
 
-  static AgeHeader parse(String content) {
+  static Future<AgeHeader> parse(String content,
+      {PassphraseProvider passphraseProvider =
+          const PassphraseProvider()}) async {
     final headerAndPayload = content
         .split('\n')
         .splitAfter((element) => element.startsWith(_macSeparator))
@@ -41,7 +44,8 @@ class AgeHeader {
     final stanzaContent = headerLines.sublist(1, headerLines.length - 1);
     final stanzaLines =
         stanzaContent.splitBefore((line) => line.startsWith('->'));
-    final stanzas = stanzaLines.map((e) => AgeStanza.parse(e.join('\n')));
+    final stanzas = await Future.wait(stanzaLines.map((e) =>
+        AgeStanza.parse(e.join('\n'), passphraseProvider: passphraseProvider)));
     final mac = headerLines.last.replaceFirst('$_macSeparator ', '');
     logger.fine('Parsed mac: $mac');
     return AgeHeader._(stanzas.toList(), mac);

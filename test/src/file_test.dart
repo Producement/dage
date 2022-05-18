@@ -42,4 +42,12 @@ void main() {
     final decrypted = await encrypted.decrypt([recipientKeyPair]);
     expect(decrypted, orderedEquals(bigFile));
   });
+
+  test('encrypts and decrypts with passphrase', () async {
+    var encrypted = await AgeFile.encryptWithPassphrase(
+        Uint8List.fromList('sinu ema'.codeUnits),
+        passphraseProvider: ConstantPassphraseProvider());
+    final decrypted = await encrypted.decryptWithPassphrase();
+    expect(String.fromCharCodes(decrypted), equals('sinu ema'));
+  });
 }

@@ -3,13 +3,14 @@ library src;
 import 'dart:typed_data';
 
 import 'package:cryptography/cryptography.dart';
+import 'package:dage/src/scrypt.dart';
 
 import 'keypair.dart';
 import 'stanza.dart';
 import 'x25519.dart';
 
 abstract class AgePlugin {
-  static final List<AgePlugin> _plugins = [X25519AgePlugin()];
+  static final List<AgePlugin> _plugins = [X25519AgePlugin(), ScryptPlugin()];
 
   AgePlugin();
 
@@ -19,43 +20,60 @@ abstract class AgePlugin {
 
   Future<AgeKeyPair?> identityToKeyPair(AgeIdentity identity);
 
-  AgeStanza? parseStanza(List<String> arguments, Uint8List body);
+  Future<AgeStanza?> parseStanza(List<String> arguments, Uint8List body,
+      {PassphraseProvider passphraseProvider});
 
   Future<AgeStanza?> createStanza(
       AgeRecipient recipient, Uint8List symmetricFileKey,
       [SimpleKeyPair? ephemeralKeyPair]);
 
-  static AgeStanza? stanzaParse(List<String> arguments, Uint8List body) {
+  Future<AgeStanza?> createPassphraseStanza(
+      Uint8List symmetricFileKey, Uint8List salt,
+      {PassphraseProvider passphraseProvider});
+
+  static T firstPluginSync<T>(T? Function(AgePlugin plugin) func) {
     for (var plugin in _plugins) {
-      final stanza = plugin.parseStanza(arguments, body);
-      if (stanza != null) {
-        return stanza;
+      final result = func(plugin);
+      if (result != null) {
+        return result;
       }
     }
-    return null;
+    throw Exception('None of the plugins could handle the function!');
+  }
+
+  static Future<T> firstPlugin<T>(
+      Future<T?> Function(AgePlugin plugin) func) async {
+    for (var plugin in _plugins) {
+      final result = await func(plugin);
+      if (result != null) {
+        return result;
+      }
+    }
+    throw Exception('None of the plugins could handle the function!');
+  }
+
+  static Future<AgeStanza> stanzaParse(List<String> arguments, Uint8List body,
+      PassphraseProvider passphraseProvider) async {
+    return firstPlugin((plugin) => plugin.parseStanza(arguments, body,
+        passphraseProvider: passphraseProvider));
   }
 
   static Future<AgeStanza> stanzaCreate(
       AgeRecipient recipient, Uint8List symmetricFileKey,
       [SimpleKeyPair? ephemeralKeyPair]) async {
-    for (var plugin in _plugins) {
-      final stanza = await plugin.createStanza(
-          recipient, symmetricFileKey, ephemeralKeyPair);
-      if (stanza != null) {
-        return stanza;
-      }
-    }
-    throw Exception('Could not create stanza!');
+    return firstPlugin((plugin) =>
+        plugin.createStanza(recipient, symmetricFileKey, ephemeralKeyPair));
+  }
+
+  static Future<AgeStanza> passphraseStanzaCreate(Uint8List symmetricFileKey,
+      Uint8List salt, PassphraseProvider passphraseProvider) async {
+    return firstPlugin((plugin) => plugin.createPassphraseStanza(
+        symmetricFileKey, salt,
+        passphraseProvider: passphraseProvider));
   }
 
   static Future<AgeKeyPair> convertIdentityToKeyPair(
       AgeIdentity identity) async {
-    for (var plugin in _plugins) {
-      final keyPair = await plugin.identityToKeyPair(identity);
-      if (keyPair != null) {
-        return keyPair;
-      }
-    }
-    throw Exception('Could not create key pair!');
+    return firstPlugin((plugin) => plugin.identityToKeyPair(identity));
   }
 }

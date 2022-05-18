@@ -29,11 +29,17 @@ void main(List<String> arguments) async {
       final recipients = results['recipient'] as List<String>;
       var keyPairs =
           recipients.map((recipient) => AgeRecipient.fromBech32(recipient));
-      if (keyPairs.isEmpty) {
+      final isPassphraseEncryption = results['passphrase'] as bool;
+      if (keyPairs.isEmpty && !isPassphraseEncryption) {
         throw Exception('At least one recipient needed!');
       }
-      final encrypted = await AgeFile.encrypt(input, keyPairs.toList());
-      writeToOut(results, encrypted.content);
+      if (isPassphraseEncryption) {
+        final encrypted = await AgeFile.encryptWithPassphrase(input);
+        writeToOut(results, encrypted.content);
+      } else {
+        final encrypted = await AgeFile.encrypt(input, keyPairs.toList());
+        writeToOut(results, encrypted.content);
+      }
     } else if (results['decrypt']) {
       final input = File(results.rest.last).readAsBytesSync();
       final newFile = AgeFile(input);
@@ -43,7 +49,8 @@ void main(List<String> arguments) async {
         final decrypted = await newFile.decrypt(identities);
         writeToOut(results, decrypted);
       } else {
-        throw Exception('At least one identity needed!');
+        final decrypted = await newFile.decryptWithPassphrase();
+        writeToOut(results, decrypted);
       }
     }
   } catch (e, stacktrace) {
@@ -57,8 +64,7 @@ Future<List<AgeKeyPair>> getIdentities(ArgResults results) async {
   final keyPairs = await Future.wait(identityFiles.map((identityFile) async {
     final content = File(identityFile).readAsLinesSync();
     final key = content.firstWhere((element) => !element.startsWith('#'));
-    return await AgePlugin.convertIdentityToKeyPair(
-        AgeIdentity.fromBech32(key));
+    return AgePlugin.convertIdentityToKeyPair(AgeIdentity.fromBech32(key));
   }));
   return keyPairs.toList();
 }
@@ -75,6 +81,8 @@ void writeToOut(ArgResults results, List<int> bytes) {
 ArgResults parseArguments(List<String> arguments) {
   final parser = ArgParser();
 
+  parser.addFlag('passphrase',
+      abbr: 'p', negatable: false, help: 'Encrypt with a passphrase.');
   parser.addFlag('encrypt',
       abbr: 'e', negatable: false, help: 'Encrypt the input to the output.');
   parser.addFlag('decrypt',
