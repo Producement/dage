@@ -13,6 +13,8 @@ class AgeKeyPair {
   Uint8List? get identityBytes => _identity?.bytes;
 
   Uint8List get recipientBytes => _recipient.bytes;
+
+  AgeRecipient get recipient => _recipient;
 }
 
 class AgeIdentity {

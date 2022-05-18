@@ -15,6 +15,15 @@ class X25519AgePlugin extends AgePlugin {
   static const publicKeyPrefix = 'age';
   static const privateKeyPrefix = 'AGE-SECRET-KEY-';
 
+  static Future<AgeKeyPair> generateKeyPair() async {
+    final keyPair = await algorithm.newKeyPair();
+    final privateKey = await keyPair.extractPrivateKeyBytes();
+    final publicKey = await keyPair.extractPublicKey();
+    return AgeKeyPair(
+        AgeIdentity(privateKeyPrefix, Uint8List.fromList(privateKey)),
+        AgeRecipient(publicKeyPrefix, Uint8List.fromList(publicKey.bytes)));
+  }
+
   @override
   AgeStanza? parseStanza(List<String> arguments, Uint8List body) {
     if (arguments[0] != 'X25519') {
