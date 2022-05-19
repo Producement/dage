@@ -33,11 +33,20 @@ class ScryptPlugin extends AgePlugin {
   Future<AgeStanza?> parseStanza(List<String> arguments, Uint8List body,
       {PassphraseProvider passphraseProvider =
           const PassphraseProvider()}) async {
-    if (arguments[0] != 'scrypt') {
+    if (arguments.isEmpty || arguments[0] != 'scrypt') {
       return null;
     }
+    if (arguments.length != 3) {
+      throw Exception('Wrong amount of arguments: ${arguments.length}!');
+    }
     final salt = arguments[1].base64RawDecode();
+    if (salt.length != 16) {
+      throw Exception('Salt size is incorrect!');
+    }
     final workFactor = int.parse(arguments[2]);
+    if (body.length != 32) {
+      throw Exception('Body size is incorrect!');
+    }
     return ScryptStanza(body, salt, workFactor, passphraseProvider);
   }
 

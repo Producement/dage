@@ -29,10 +29,20 @@ class X25519AgePlugin extends AgePlugin {
   Future<AgeStanza?> parseStanza(List<String> arguments, Uint8List body,
       {PassphraseProvider passphraseProvider =
           const PassphraseProvider()}) async {
-    if (arguments[0] != 'X25519') {
+    if (arguments.isEmpty || arguments[0] != 'X25519') {
       return null;
     }
-    return X25519AgeStanza._(arguments[1].base64RawDecode(), body);
+    if (arguments.length != 2) {
+      throw Exception('Wrong amount of arguments: ${arguments.length}!');
+    }
+    final ephemeralShare = arguments[1].base64RawDecode();
+    if (ephemeralShare.length != 32) {
+      throw Exception('Ephemeral share size is incorrect!');
+    }
+    if (body.length != 32) {
+      throw Exception('Body size is incorrect!');
+    }
+    return X25519AgeStanza._(ephemeralShare, body);
   }
 
   @override
@@ -108,8 +118,12 @@ class X25519AgeStanza extends AgeStanza {
       Uint8List recipientPublicKey, SimpleKeyPair ephemeralKeypair) async {
     final remotePublicKey =
         SimplePublicKey(recipientPublicKey, type: KeyPairType.x25519);
-    var sharedSecret = await X25519AgePlugin.algorithm.sharedSecretKey(
+    final sharedSecret = await X25519AgePlugin.algorithm.sharedSecretKey(
         keyPair: ephemeralKeypair, remotePublicKey: remotePublicKey);
+    final sharedSecretBytes = await sharedSecret.extractBytes();
+    if (sharedSecretBytes.every((element) => element == 0x00)) {
+      throw Exception('All shared secret bytes are 0x00!');
+    }
     return sharedSecret;
   }
 

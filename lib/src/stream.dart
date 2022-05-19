@@ -25,6 +25,8 @@ class AgeStream {
                 index++;
               } else if (byte == 0x2D && index > 0 && index < 3) {
                 index++;
+              } else {
+                index = 0;
               }
               if (index == 3) {
                 logger.fine(
@@ -32,7 +34,7 @@ class AgeStream {
                 isMac = true;
               }
               headerBuffer.add(byte);
-            } else if (byte == 0x0a) {
+            } else if (byte == 0x0a && isMac) {
               logger.fine('End of mac line. All following bytes are payload.');
               isPayload = true;
             } else {

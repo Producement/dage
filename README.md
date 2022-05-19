@@ -11,6 +11,4 @@ The reference interoperable Go implementation is available at
 
 ## Disclaimer
 
-This project is still a work in progress. Use at your own risk!
-
 **NB! This project is not officially endorsed by original age authors in any way!**

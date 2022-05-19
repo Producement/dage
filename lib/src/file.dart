@@ -31,7 +31,6 @@ class AgeFile {
   Stream<List<int>> decrypt(List<AgeKeyPair> keyPairs) async* {
     final split = AgeStream(_content);
     final rawHeader = await split.header.stream.toList();
-
     final header = await AgeHeader.parse(
         utf8.decode(rawHeader.flattened.toList()),
         passphraseProvider: passphraseProvider);
@@ -59,7 +58,6 @@ class AgeFile {
   Stream<List<int>> decryptWithPassphrase() async* {
     final split = AgeStream(_content);
     final rawHeader = await split.header.stream.toList();
-
     final header = await AgeHeader.parse(
         utf8.decode(rawHeader.flattened.toList()),
         passphraseProvider: passphraseProvider);

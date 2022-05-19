@@ -58,4 +58,20 @@ void main() {
     final response = await decrypted.toList();
     expect(String.fromCharCodes(response.flattened), equals('sinu ema'));
   });
+
+  test('only one stanza is allowed when decrypting with a password', () async {
+    final encryptedFileWithExtraStanza = '''age-encryption.org/v1
+-> X25519 L+V9o0fNYkMVKNqsX7spBzD/9oSvxM/C7ZCZX1jLO3Q
+5JB0/RnLXiJHL29Bg7V1kWZX5+WaM8KjNryAX74lJQg
+-> scrypt zzYuo2y6OED2CG3D53V0fw 18
+bDv3uo69Okm5eK3/EgDNcG2DJWng6CvAqIVEzxM4Qmo
+--- B8KHU7wT6kOr8cgWResfbN3irfAO3yZpt0aoR026YHs
+'''
+            .codeUnits +
+        nonce +
+        dataAsEncryptedBytes;
+    final file = AgeFile(Stream.value(encryptedFileWithExtraStanza),
+        passphraseProvider: ConstantPassphraseProvider());
+    expect(file.decryptWithPassphrase(), emitsError(isA<Exception>()));
+  });
 }

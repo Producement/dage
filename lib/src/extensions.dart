@@ -16,8 +16,12 @@ extension IntListExtensions on List<int> {
 
 extension StringExtensions on String {
   Uint8List base64RawDecode() {
+    if (contains('=')) {
+      throw Exception('Padded base64 not supported!');
+    }
     if (length % 4 != 0) {
-      return '$this='.base64RawDecode();
+      return base64Decode(
+          '${this}${List.generate(4 - length % 4, (index) => '=').join()}');
     }
     return base64Decode(this);
   }
