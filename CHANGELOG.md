@@ -1,3 +1,7 @@
+## 1.0.1
+
+- Export passphrase provider.
+
 ## 1.0.0
 
 - Everything from spec implemented.
