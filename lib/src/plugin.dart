@@ -3,9 +3,10 @@ library src;
 import 'dart:typed_data';
 
 import 'package:cryptography/cryptography.dart';
-import 'package:dage/src/scrypt.dart';
 
 import 'keypair.dart';
+import 'passphrase_provider.dart';
+import 'scrypt.dart';
 import 'stanza.dart';
 import 'x25519.dart';
 

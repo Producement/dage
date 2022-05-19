@@ -1,13 +1,16 @@
-import 'dart:io';
+library src;
+
 import 'dart:typed_data';
 
 import 'package:cryptography/cryptography.dart';
-import 'package:dage/src/keypair.dart';
-import 'package:dage/src/plugin.dart';
-import 'package:dage/src/stanza.dart';
-import 'package:dage/src/util.dart';
 import 'package:pointycastle/key_derivators/scrypt.dart';
 import 'package:pointycastle/pointycastle.dart';
+
+import 'extensions.dart';
+import 'keypair.dart';
+import 'passphrase_provider.dart';
+import 'plugin.dart';
+import 'stanza.dart';
 
 class ScryptPlugin extends AgePlugin {
   static const _info = 'age-encryption.org/v1/scrypt';
@@ -20,9 +23,8 @@ class ScryptPlugin extends AgePlugin {
   }
 
   @override
-  Future<AgeKeyPair?> identityToKeyPair(AgeIdentity identity) {
-    // TODO: implement identityToKeyPair
-    throw UnimplementedError();
+  Future<AgeKeyPair?> identityToKeyPair(AgeIdentity identity) async {
+    return null;
   }
 
   @override
@@ -32,7 +34,7 @@ class ScryptPlugin extends AgePlugin {
     if (arguments[0] != 'scrypt') {
       return null;
     }
-    final salt = base64RawDecode(arguments[1]);
+    final salt = arguments[1].base64RawDecode();
     final workFactor = int.parse(arguments[2]);
     return ScryptStanza(body, salt, workFactor, passphraseProvider);
   }
@@ -79,18 +81,8 @@ class ScryptStanza extends AgeStanza {
 
   @override
   Future<String> serialize() async {
-    final header = '-> $_algorithmTag ${base64RawEncode(_salt)} $_workFactor';
-    final body = base64RawEncode(_wrappedKey);
-    return '${wrapAtPosition(header)}\n${wrapAtPosition(body)}';
-  }
-}
-
-class PassphraseProvider {
-  const PassphraseProvider();
-
-  String passphrase() {
-    print('Enter passphrase:');
-    stdin.echoMode = false;
-    return stdin.readLineSync()!;
+    final header = '-> $_algorithmTag ${_salt.base64RawEncode()} $_workFactor';
+    final body = _wrappedKey.base64RawEncode();
+    return '${header.wrapAtPosition()}\n${body.wrapAtPosition()}';
   }
 }

@@ -4,15 +4,15 @@ import 'dart:typed_data';
 
 import 'package:collection/collection.dart';
 import 'package:cryptography/cryptography.dart';
-import 'package:dage/src/scrypt.dart';
 import 'package:logging/logging.dart';
 
+import 'extensions.dart';
 import 'header.dart';
 import 'keypair.dart';
+import 'passphrase_provider.dart';
 import 'plugin.dart';
 import 'random.dart';
 import 'stanza.dart';
-import 'util.dart';
 
 class AgeFile {
   static final Logger logger = Logger('AgeFile');
@@ -129,7 +129,7 @@ class AgeFile {
         nonce: payloadNonce,
         info: 'payload'.codeUnits);
     final encryptionAlgorithm = Chacha20.poly1305Aead();
-    final chunkedContent = chunk(payload, 64 * 1024 + 16);
+    final chunkedContent = payload.chunk(64 * 1024 + 16);
     logger.fine('Chunks: ${chunkedContent.length}');
     final decrypted =
         await Future.wait(chunkedContent.mapIndexed((i, chunk) async {
@@ -161,7 +161,7 @@ class AgeFile {
         nonce: payloadNonce,
         info: 'payload'.codeUnits);
     final encryptionAlgorithm = Chacha20.poly1305Aead();
-    final chunkedContent = chunk(payload, 64 * 1024);
+    final chunkedContent = payload.chunk(64 * 1024);
     logger.fine('Chunks: ${chunkedContent.length}');
     final encrypted =
         await Future.wait(chunkedContent.mapIndexed((i, chunk) async {

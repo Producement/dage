@@ -4,8 +4,8 @@ import 'dart:typed_data';
 import 'package:convert/convert.dart';
 import 'package:cryptography/cryptography.dart';
 import 'package:dage/src/keypair.dart';
+import 'package:dage/src/passphrase_provider.dart';
 import 'package:dage/src/random.dart';
-import 'package:dage/src/scrypt.dart';
 import 'package:logging/logging.dart';
 
 final recipient = AgeRecipient.fromBech32(

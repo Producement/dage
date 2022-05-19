@@ -4,11 +4,11 @@ import 'dart:typed_data';
 
 import 'package:collection/collection.dart';
 import 'package:cryptography/cryptography.dart';
-import 'package:dage/src/scrypt.dart';
 import 'package:logging/logging.dart';
 
+import 'extensions.dart';
+import 'passphrase_provider.dart';
 import 'stanza.dart';
-import 'util.dart';
 
 class AgeHeader {
   static final logger = Logger('AgeHeader');
@@ -85,6 +85,6 @@ class AgeHeader {
         info: 'header'.codeUnits);
     final mac = await hkdfAlgorithm.hmac
         .calculateMac(header.codeUnits, secretKey: macKey);
-    return base64RawEncode(mac.bytes);
+    return mac.bytes.base64RawEncode();
   }
 }

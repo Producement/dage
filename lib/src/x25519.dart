@@ -3,13 +3,13 @@ library src;
 import 'dart:typed_data';
 
 import 'package:cryptography/cryptography.dart';
-import 'package:dage/src/scrypt.dart';
 import 'package:logging/logging.dart';
 
+import 'extensions.dart';
 import 'keypair.dart';
+import 'passphrase_provider.dart';
 import 'plugin.dart';
 import 'stanza.dart';
-import 'util.dart';
 
 class X25519AgePlugin extends AgePlugin {
   static final algorithm = X25519();
@@ -32,7 +32,7 @@ class X25519AgePlugin extends AgePlugin {
     if (arguments[0] != 'X25519') {
       return null;
     }
-    return X25519AgeStanza._(base64RawDecode(arguments[1]), body);
+    return X25519AgeStanza._(arguments[1].base64RawDecode(), body);
   }
 
   @override
@@ -86,9 +86,9 @@ class X25519AgeStanza extends AgeStanza {
 
   @override
   Future<String> serialize() async {
-    final header = '-> $_algorithmTag ${base64RawEncode(_ephemeralPublicKey)}';
-    final body = base64RawEncode(_wrappedKey);
-    return '${wrapAtPosition(header)}\n${wrapAtPosition(body)}';
+    final header = '-> $_algorithmTag ${_ephemeralPublicKey.base64RawEncode()}';
+    final body = _wrappedKey.base64RawEncode();
+    return '${header.wrapAtPosition()}\n${body.wrapAtPosition()}';
   }
 
   static Future<SecretKey> _deriveKey(
