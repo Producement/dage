@@ -1,5 +1,7 @@
+import 'dart:async';
 import 'dart:typed_data';
 
+import 'package:collection/collection.dart';
 import 'package:convert/convert.dart';
 import 'package:dage/src/file.dart';
 import 'package:test/test.dart';
@@ -23,31 +25,37 @@ void main() {
 
   test('encrypt', () async {
     final ephemeralKeyPair = await algorithm.newKeyPairFromSeed(Uint8List(32));
-    var encrypted = await AgeFile.encrypt(
-        Uint8List.fromList('sinu ema'.codeUnits), [recipient],
+    var encrypted = AgeFile.encrypt(
+        Stream.value('sinu ema'.codeUnits), [recipient],
         random: ConstAgeRandom(), keyPair: ephemeralKeyPair);
-    expect(encrypted.content, orderedEquals(encryptedFile));
+    final response = await encrypted.toList();
+    expect(response.flattened, orderedEquals(encryptedFile));
   });
 
   test('decrypt', () async {
-    final file = AgeFile(Uint8List.fromList(encryptedFile));
-    final decrypted = await file.decrypt([recipientKeyPair]);
-    expect(String.fromCharCodes(decrypted), equals('sinu ema'));
+    final file = AgeFile(Stream.value(encryptedFile));
+    final decrypted = file.decrypt([recipientKeyPair]);
+    final response = await decrypted.toList();
+    expect(String.fromCharCodes(response.flattened), equals('sinu ema'));
   });
 
   test('encrypts and decrypts multiple chunks', () async {
     final bigFile =
         Uint8List.fromList(List.generate(1024 * 100, (index) => 0x01));
-    var encrypted = await AgeFile.encrypt(bigFile, [recipient]);
-    final decrypted = await encrypted.decrypt([recipientKeyPair]);
-    expect(decrypted, orderedEquals(bigFile));
+    var encrypted = AgeFile.encrypt(Stream.value(bigFile), [recipient]);
+    final decrypted = AgeFile(encrypted).decrypt([recipientKeyPair]);
+    final response = await decrypted.toList();
+    expect(response.flattened, orderedEquals(bigFile));
   });
 
   test('encrypts and decrypts with passphrase', () async {
-    var encrypted = await AgeFile.encryptWithPassphrase(
-        Uint8List.fromList('sinu ema'.codeUnits),
+    var encrypted = AgeFile.encryptWithPassphrase(
+        Stream.value(Uint8List.fromList('sinu ema'.codeUnits)),
         passphraseProvider: ConstantPassphraseProvider());
-    final decrypted = await encrypted.decryptWithPassphrase();
-    expect(String.fromCharCodes(decrypted), equals('sinu ema'));
+    final decrypted =
+        AgeFile(encrypted, passphraseProvider: ConstantPassphraseProvider())
+            .decryptWithPassphrase();
+    final response = await decrypted.toList();
+    expect(String.fromCharCodes(response.flattened), equals('sinu ema'));
   });
 }

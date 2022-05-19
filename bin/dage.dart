@@ -25,7 +25,7 @@ void main(List<String> arguments) async {
 
   try {
     if (results['encrypt']) {
-      final input = File(results.rest.last).readAsBytesSync();
+      final unencryptedFile = File(results.rest.last);
       final recipients = results['recipient'] as List<String>;
       var keyPairs =
           recipients.map((recipient) => AgeRecipient.fromBech32(recipient));
@@ -34,22 +34,23 @@ void main(List<String> arguments) async {
         throw Exception('At least one recipient needed!');
       }
       if (isPassphraseEncryption) {
-        final encrypted = await AgeFile.encryptWithPassphrase(input);
-        writeToOut(results, encrypted.content);
+        final encrypted =
+            AgeFile.encryptWithPassphrase(unencryptedFile.openRead());
+        writeToOut(results, encrypted);
       } else {
-        final encrypted = await AgeFile.encrypt(input, keyPairs.toList());
-        writeToOut(results, encrypted.content);
+        final encrypted =
+            AgeFile.encrypt(unencryptedFile.openRead(), keyPairs.toList());
+        writeToOut(results, encrypted);
       }
     } else if (results['decrypt']) {
-      final input = File(results.rest.last).readAsBytesSync();
-      final newFile = AgeFile(input);
+      final encryptedFile = AgeFile(File(results.rest.last).openRead());
       final identityList = results['identity'] as List<String>;
       if (identityList.isNotEmpty) {
         final identities = await getIdentities(results);
-        final decrypted = await newFile.decrypt(identities);
+        final decrypted = encryptedFile.decrypt(identities);
         writeToOut(results, decrypted);
       } else {
-        final decrypted = await newFile.decryptWithPassphrase();
+        final decrypted = encryptedFile.decryptWithPassphrase();
         writeToOut(results, decrypted);
       }
     }
@@ -69,12 +70,12 @@ Future<List<AgeKeyPair>> getIdentities(ArgResults results) async {
   return keyPairs.toList();
 }
 
-void writeToOut(ArgResults results, List<int> bytes) {
+void writeToOut(ArgResults results, Stream<List<int>> bytes) {
   final output = results['output'];
   if (output != null) {
-    File(output).writeAsBytesSync(bytes);
+    File(output).openWrite().addStream(bytes);
   } else {
-    stdout.add(bytes);
+    stdout.addStream(bytes);
   }
 }
 

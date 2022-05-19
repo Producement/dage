@@ -29,14 +29,11 @@ class AgeHeader {
     return AgeHeader._(stanzas, mac);
   }
 
-  static Future<AgeHeader> parse(String content,
+  static Future<AgeHeader> parse(String header,
       {PassphraseProvider passphraseProvider =
           const PassphraseProvider()}) async {
-    final headerAndPayload = content
-        .split('\n')
-        .splitAfter((element) => element.startsWith(_macSeparator))
-        .toList();
-    final headerLines = headerAndPayload[0];
+    logger.finer('Header: $header');
+    final headerLines = header.split('\n');
     final versionLine = headerLines[0];
     if (versionLine != _version) {
       throw Exception('Unsupported version: $versionLine');
