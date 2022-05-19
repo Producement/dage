@@ -1,7 +1,7 @@
 import 'dart:typed_data';
 
 import 'package:dage/src/header.dart';
-import 'package:dage/src/x25519.dart';
+import 'package:dage/src/plugin/x25519.dart';
 import 'package:test/test.dart';
 
 import 'fixture.dart';

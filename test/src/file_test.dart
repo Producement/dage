@@ -3,7 +3,7 @@ import 'dart:typed_data';
 
 import 'package:collection/collection.dart';
 import 'package:convert/convert.dart';
-import 'package:dage/src/file.dart';
+import 'package:dage/dage.dart';
 import 'package:test/test.dart';
 
 import 'fixture.dart';
@@ -25,16 +25,14 @@ void main() {
 
   test('encrypt', () async {
     final ephemeralKeyPair = await algorithm.newKeyPairFromSeed(Uint8List(32));
-    var encrypted = AgeFile.encrypt(
-        Stream.value('sinu ema'.codeUnits), [recipient],
+    var encrypted = encrypt(Stream.value('sinu ema'.codeUnits), [recipient],
         random: ConstAgeRandom(), keyPair: ephemeralKeyPair);
     final response = await encrypted.toList();
     expect(response.flattened, orderedEquals(encryptedFile));
   });
 
   test('decrypt', () async {
-    final file = AgeFile(Stream.value(encryptedFile));
-    final decrypted = file.decrypt([recipientKeyPair]);
+    final decrypted = decrypt(Stream.value(encryptedFile), [recipientKeyPair]);
     final response = await decrypted.toList();
     expect(String.fromCharCodes(response.flattened), equals('sinu ema'));
   });
@@ -42,19 +40,18 @@ void main() {
   test('encrypts and decrypts multiple chunks', () async {
     final bigFile =
         Uint8List.fromList(List.generate(1024 * 100, (index) => 0x01));
-    var encrypted = AgeFile.encrypt(Stream.value(bigFile), [recipient]);
-    final decrypted = AgeFile(encrypted).decrypt([recipientKeyPair]);
+    var encrypted = encrypt(Stream.value(bigFile), [recipient]);
+    final decrypted = decrypt(encrypted, [recipientKeyPair]);
     final response = await decrypted.toList();
     expect(response.flattened, orderedEquals(bigFile));
   });
 
   test('encrypts and decrypts with passphrase', () async {
-    var encrypted = AgeFile.encryptWithPassphrase(
+    var encrypted = encryptWithPassphrase(
         Stream.value(Uint8List.fromList('sinu ema'.codeUnits)),
         passphraseProvider: ConstantPassphraseProvider());
-    final decrypted =
-        AgeFile(encrypted, passphraseProvider: ConstantPassphraseProvider())
-            .decryptWithPassphrase();
+    final decrypted = decryptWithPassphrase(encrypted,
+        passphraseProvider: ConstantPassphraseProvider());
     final response = await decrypted.toList();
     expect(String.fromCharCodes(response.flattened), equals('sinu ema'));
   });
@@ -70,8 +67,9 @@ bDv3uo69Okm5eK3/EgDNcG2DJWng6CvAqIVEzxM4Qmo
             .codeUnits +
         nonce +
         dataAsEncryptedBytes;
-    final file = AgeFile(Stream.value(encryptedFileWithExtraStanza),
-        passphraseProvider: ConstantPassphraseProvider());
-    expect(file.decryptWithPassphrase(), emitsError(isA<Exception>()));
+    expect(
+        decryptWithPassphrase(Stream.value(encryptedFileWithExtraStanza),
+            passphraseProvider: ConstantPassphraseProvider()),
+        emitsError(isA<Exception>()));
   });
 }

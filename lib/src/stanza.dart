@@ -1,13 +1,13 @@
-library src;
+library age.src;
 
 import 'dart:typed_data';
 
 import 'package:cryptography/cryptography.dart';
-import 'package:dage/src/extensions.dart';
 
 import 'keypair.dart';
 import 'passphrase_provider.dart';
-import 'plugin.dart';
+import 'plugin/encoding.dart';
+import 'plugin/plugin.dart';
 
 abstract class AgeStanza {
   AgeStanza();
@@ -19,7 +19,7 @@ abstract class AgeStanza {
     final arguments = lines[0].replaceFirst('-> ', '').split(' ');
     final body = lines.sublist(1).join('').replaceAll('\n', '');
     return AgePlugin.stanzaParse(
-        arguments, body.base64RawDecode(), passphraseProvider);
+        arguments, base64RawDecode(body), passphraseProvider);
   }
 
   Future<String> serialize();

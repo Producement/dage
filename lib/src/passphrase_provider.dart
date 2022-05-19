@@ -1,3 +1,5 @@
+library age.src;
+
 import 'dart:io';
 
 class PassphraseProvider {

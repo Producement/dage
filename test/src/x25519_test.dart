@@ -1,7 +1,7 @@
 import 'dart:typed_data';
 
-import 'package:dage/src/extensions.dart';
-import 'package:dage/src/x25519.dart';
+import 'package:dage/dage.dart';
+import 'package:dage/src/plugin/x25519.dart';
 import 'package:test/test.dart';
 
 import 'fixture.dart';
@@ -44,7 +44,7 @@ void main() {
     await expectLater(
         plugin.parseStanza(
             ['X25519', 'L+V9o0fNYkMVKNqsX7spBzD/9oSvxM/C7ZCZX1jLO3Q'],
-            '1cT9u0o55LQ9SVnYROZh6SqATr3CGseHSlgf4YMD4LE'.base64RawDecode()),
+            base64RawDecode('1cT9u0o55LQ9SVnYROZh6SqATr3CGseHSlgf4YMD4LE')),
         completion(isNotNull));
   });
 }

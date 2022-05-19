@@ -25,7 +25,6 @@ void main(List<String> arguments) async {
 
   try {
     if (results['encrypt']) {
-      final unencryptedFile = File(results.rest.last);
       final recipients = results['recipient'] as List<String>;
       var keyPairs =
           recipients.map((recipient) => AgeRecipient.fromBech32(recipient));
@@ -34,23 +33,20 @@ void main(List<String> arguments) async {
         throw Exception('At least one recipient needed!');
       }
       if (isPassphraseEncryption) {
-        final encrypted =
-            AgeFile.encryptWithPassphrase(unencryptedFile.openRead());
+        final encrypted = encryptWithPassphrase(readFromInput(results));
         writeToOut(results, encrypted);
       } else {
-        final encrypted =
-            AgeFile.encrypt(unencryptedFile.openRead(), keyPairs.toList());
+        final encrypted = encrypt(readFromInput(results), keyPairs.toList());
         writeToOut(results, encrypted);
       }
     } else if (results['decrypt']) {
-      final encryptedFile = AgeFile(File(results.rest.last).openRead());
       final identityList = results['identity'] as List<String>;
       if (identityList.isNotEmpty) {
         final identities = await getIdentities(results);
-        final decrypted = encryptedFile.decrypt(identities);
+        final decrypted = decrypt(readFromInput(results), identities);
         writeToOut(results, decrypted);
       } else {
-        final decrypted = encryptedFile.decryptWithPassphrase();
+        final decrypted = decryptWithPassphrase(readFromInput(results));
         writeToOut(results, decrypted);
       }
     }
@@ -68,6 +64,15 @@ Future<List<AgeKeyPair>> getIdentities(ArgResults results) async {
     return AgePlugin.convertIdentityToKeyPair(AgeIdentity.fromBech32(key));
   }));
   return keyPairs.toList();
+}
+
+Stream<List<int>> readFromInput(ArgResults results) {
+  if (results.rest.isNotEmpty) {
+    final fileName = results.rest.last;
+    return File(fileName).openRead();
+  } else {
+    return stdin;
+  }
 }
 
 void writeToOut(ArgResults results, Stream<List<int>> bytes) {

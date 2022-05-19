@@ -1,13 +1,13 @@
-library src;
+library age.plugin;
 
 import 'dart:typed_data';
 
 import 'package:cryptography/cryptography.dart';
 
-import 'keypair.dart';
-import 'passphrase_provider.dart';
+import '../keypair.dart';
+import '../passphrase_provider.dart';
 import 'scrypt.dart';
-import 'stanza.dart';
+import '../stanza.dart';
 import 'x25519.dart';
 
 abstract class AgePlugin {

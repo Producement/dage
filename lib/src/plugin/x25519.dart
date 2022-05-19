@@ -5,11 +5,11 @@ import 'dart:typed_data';
 import 'package:cryptography/cryptography.dart';
 import 'package:logging/logging.dart';
 
-import 'extensions.dart';
-import 'keypair.dart';
-import 'passphrase_provider.dart';
+import 'encoding.dart';
+import '../keypair.dart';
+import '../passphrase_provider.dart';
 import 'plugin.dart';
-import 'stanza.dart';
+import '../stanza.dart';
 
 class X25519AgePlugin extends AgePlugin {
   static final algorithm = X25519();
@@ -35,7 +35,7 @@ class X25519AgePlugin extends AgePlugin {
     if (arguments.length != 2) {
       throw Exception('Wrong amount of arguments: ${arguments.length}!');
     }
-    final ephemeralShare = arguments[1].base64RawDecode();
+    final ephemeralShare = base64RawDecode(arguments[1]);
     if (ephemeralShare.length != 32) {
       throw Exception('Ephemeral share size is incorrect!');
     }
@@ -96,9 +96,9 @@ class X25519AgeStanza extends AgeStanza {
 
   @override
   Future<String> serialize() async {
-    final header = '-> $_algorithmTag ${_ephemeralPublicKey.base64RawEncode()}';
-    final body = _wrappedKey.base64RawEncode();
-    return '${header.wrapAtPosition()}\n${body.wrapAtPosition()}';
+    final header = '-> $_algorithmTag ${base64RawEncode(_ephemeralPublicKey)}';
+    final body = base64RawEncode(_wrappedKey);
+    return '${wrapAtPosition(header)}\n${wrapAtPosition(body)}';
   }
 
   static Future<SecretKey> _deriveKey(

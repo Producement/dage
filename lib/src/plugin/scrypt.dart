@@ -1,4 +1,4 @@
-library src;
+library age.plugin;
 
 import 'dart:math';
 import 'dart:typed_data';
@@ -7,11 +7,11 @@ import 'package:cryptography/cryptography.dart';
 import 'package:pointycastle/key_derivators/scrypt.dart';
 import 'package:pointycastle/pointycastle.dart';
 
-import 'extensions.dart';
-import 'keypair.dart';
-import 'passphrase_provider.dart';
+import '../keypair.dart';
+import '../passphrase_provider.dart';
+import 'encoding.dart';
 import 'plugin.dart';
-import 'stanza.dart';
+import '../stanza.dart';
 
 class ScryptPlugin extends AgePlugin {
   static const _info = 'age-encryption.org/v1/scrypt';
@@ -39,7 +39,7 @@ class ScryptPlugin extends AgePlugin {
     if (arguments.length != 3) {
       throw Exception('Wrong amount of arguments: ${arguments.length}!');
     }
-    final salt = arguments[1].base64RawDecode();
+    final salt = base64RawDecode(arguments[1]);
     if (salt.length != 16) {
       throw Exception('Salt size is incorrect!');
     }
@@ -93,8 +93,8 @@ class ScryptStanza extends AgeStanza {
 
   @override
   Future<String> serialize() async {
-    final header = '-> $_algorithmTag ${_salt.base64RawEncode()} $_workFactor';
-    final body = _wrappedKey.base64RawEncode();
-    return '${header.wrapAtPosition()}\n${body.wrapAtPosition()}';
+    final header = '-> $_algorithmTag ${base64RawEncode(_salt)} $_workFactor';
+    final body = base64RawEncode(_wrappedKey);
+    return '${wrapAtPosition(header)}\n${wrapAtPosition(body)}';
   }
 }

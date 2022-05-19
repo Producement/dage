@@ -1,4 +1,4 @@
-library src;
+library age.src;
 
 import 'dart:typed_data';
 
@@ -6,7 +6,7 @@ import 'package:collection/collection.dart';
 import 'package:cryptography/cryptography.dart';
 import 'package:logging/logging.dart';
 
-import 'extensions.dart';
+import 'plugin/encoding.dart';
 import 'passphrase_provider.dart';
 import 'stanza.dart';
 
@@ -82,6 +82,6 @@ class AgeHeader {
         info: 'header'.codeUnits);
     final mac = await hkdfAlgorithm.hmac
         .calculateMac(header.codeUnits, secretKey: macKey);
-    return mac.bytes.base64RawEncode();
+    return base64RawEncode(mac.bytes);
   }
 }
