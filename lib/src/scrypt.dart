@@ -1,5 +1,6 @@
 library src;
 
+import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:cryptography/cryptography.dart';
@@ -14,6 +15,7 @@ import 'stanza.dart';
 
 class ScryptPlugin extends AgePlugin {
   static const _info = 'age-encryption.org/v1/scrypt';
+  static const _defaultWorkFactor = 18;
 
   @override
   Future<AgeStanza?> createStanza(
@@ -45,15 +47,16 @@ class ScryptPlugin extends AgePlugin {
       {PassphraseProvider passphraseProvider =
           const PassphraseProvider()}) async {
     final derivator = Scrypt();
-    final parameters = ScryptParameters(
-        16, 8, 1, 32, Uint8List.fromList(_info.codeUnits + salt));
+    final parameters = ScryptParameters(pow(2, _defaultWorkFactor).toInt(), 8,
+        1, 32, Uint8List.fromList(_info.codeUnits + salt));
     derivator.init(parameters);
     final passphrase = passphraseProvider.passphrase();
     final derivedKey =
         derivator.process(Uint8List.fromList(passphrase.codeUnits));
     final wrappedKey =
         await AgeStanza.wrap(symmetricFileKey, SecretKey(derivedKey));
-    return ScryptStanza(wrappedKey, salt, 16, passphraseProvider);
+    return ScryptStanza(
+        wrappedKey, salt, _defaultWorkFactor, passphraseProvider);
   }
 }
 
@@ -70,7 +73,7 @@ class ScryptStanza extends AgeStanza {
   @override
   Future<Uint8List> decryptedFileKey(AgeKeyPair? keyPair) async {
     final derivator = Scrypt();
-    final parameters = ScryptParameters(_workFactor, 8, 1, 32,
+    final parameters = ScryptParameters(pow(2, _workFactor).toInt(), 8, 1, 32,
         Uint8List.fromList(ScryptPlugin._info.codeUnits + _salt));
     derivator.init(parameters);
     final passphrase = _passphraseProvider.passphrase();
