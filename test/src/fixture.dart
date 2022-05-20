@@ -41,5 +41,5 @@ class ConstAgeRandom implements AgeRandom {
 
 class ConstantPassphraseProvider implements PassphraseProvider {
   @override
-  String passphrase() => '12345678';
+  Future<String> passphrase() async => '12345678';
 }

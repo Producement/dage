@@ -59,7 +59,7 @@ class ScryptPlugin extends AgePlugin {
     final parameters = ScryptParameters(pow(2, _defaultWorkFactor).toInt(), 8,
         1, 32, Uint8List.fromList(_info.codeUnits + salt));
     derivator.init(parameters);
-    final passphrase = passphraseProvider.passphrase();
+    final passphrase = await passphraseProvider.passphrase();
     final derivedKey =
         derivator.process(Uint8List.fromList(passphrase.codeUnits));
     final wrappedKey =
@@ -85,7 +85,7 @@ class ScryptStanza extends AgeStanza {
     final parameters = ScryptParameters(pow(2, _workFactor).toInt(), 8, 1, 32,
         Uint8List.fromList(ScryptPlugin._info.codeUnits + _salt));
     derivator.init(parameters);
-    final passphrase = _passphraseProvider.passphrase();
+    final passphrase = await _passphraseProvider.passphrase();
     final derivedKey =
         derivator.process(Uint8List.fromList(passphrase.codeUnits));
     return AgeStanza.unwrap(_wrappedKey, SecretKey(derivedKey));
