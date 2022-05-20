@@ -1,3 +1,8 @@
+## 1.0.2
+
+- Read password from tty when stdin is not terminal.
+- Refactor plugin structure for extensibility.
+
 ## 1.0.1
 
 - Export passphrase provider.
