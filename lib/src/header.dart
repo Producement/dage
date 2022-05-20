@@ -17,7 +17,7 @@ class AgeHeader {
   final List<AgeStanza> _stanzas;
   final String _mac;
 
-  AgeHeader._(this._stanzas, this._mac);
+  const AgeHeader._(this._stanzas, this._mac);
 
   List<AgeStanza> get stanzas => _stanzas;
 

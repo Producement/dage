@@ -1,3 +1,7 @@
+## 1.0.3
+
+- Relax dependency requirements.
+
 ## 1.0.2
 
 - Read password from tty when stdin is not terminal.

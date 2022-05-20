@@ -10,7 +10,7 @@ import 'plugin/encoding.dart';
 import 'plugin/plugin.dart';
 
 abstract class AgeStanza {
-  AgeStanza();
+  const AgeStanza();
 
   static Future<AgeStanza> parse(String content,
       {PassphraseProvider passphraseProvider =

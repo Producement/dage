@@ -16,6 +16,8 @@ class X25519AgePlugin extends AgePlugin {
   static const publicKeyPrefix = 'age';
   static const privateKeyPrefix = 'AGE-SECRET-KEY-';
 
+  const X25519AgePlugin();
+
   static Future<AgeKeyPair> generateKeyPair() async {
     final keyPair = await algorithm.newKeyPair();
     final privateKey = await keyPair.extractPrivateKeyBytes();
@@ -80,7 +82,7 @@ class X25519AgeStanza extends AgeStanza {
   final Uint8List _ephemeralPublicKey;
   final Uint8List _wrappedKey;
 
-  X25519AgeStanza._(this._ephemeralPublicKey, this._wrappedKey) : super();
+  const X25519AgeStanza._(this._ephemeralPublicKey, this._wrappedKey) : super();
 
   static Future<X25519AgeStanza> create(
       Uint8List recipientPublicKey, Uint8List symmetricFileKey,

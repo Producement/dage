@@ -11,9 +11,9 @@ import '../stanza.dart';
 import 'x25519.dart';
 
 abstract class AgePlugin {
-  static final List<AgePlugin> _plugins = [X25519AgePlugin(), ScryptPlugin()];
+  static const List<AgePlugin> _plugins = [X25519AgePlugin(), ScryptPlugin()];
 
-  AgePlugin();
+  const AgePlugin();
 
   static void registerPlugin(AgePlugin p) {
     _plugins.add(p);

@@ -17,6 +17,8 @@ class ScryptPlugin extends AgePlugin {
   static const _info = 'age-encryption.org/v1/scrypt';
   static const _defaultWorkFactor = 18;
 
+  const ScryptPlugin();
+
   @override
   Future<AgeStanza?> createStanza(
       AgeRecipient recipient, Uint8List symmetricFileKey,
