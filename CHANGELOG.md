@@ -1,3 +1,7 @@
+## 1.0.4
+
+- Make plugin list modifiable.
+
 ## 1.0.3
 
 - Relax dependency requirements.
