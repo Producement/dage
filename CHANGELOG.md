@@ -1,3 +1,7 @@
+## 1.0.5
+
+- Use List<int> for parameters, Uint8List for return types.
+
 ## 1.0.4
 
 - Make plugin list modifiable.

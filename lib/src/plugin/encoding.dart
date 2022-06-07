@@ -6,11 +6,11 @@ import 'dart:typed_data';
 String base64RawEncode(List<int> data) =>
     base64Encode(data).replaceAll('=', '');
 
-List<Uint8List> chunk(Uint8List data, int chunkSize) {
-  final chunked = <Uint8List>[];
+List<List<int>> chunk(List<int> data, int chunkSize) {
+  final chunked = <List<int>>[];
   for (var i = 0; i < data.length; i += chunkSize) {
     final end = (i + chunkSize < data.length) ? i + chunkSize : data.length;
-    chunked.add(Uint8List.fromList(data.sublist(i, end)));
+    chunked.add(data.sublist(i, end));
   }
   return chunked;
 }

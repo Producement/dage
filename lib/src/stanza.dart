@@ -27,7 +27,7 @@ abstract class AgeStanza {
   Future<Uint8List> decryptedFileKey(AgeKeyPair? keyPair);
 
   static Future<Uint8List> wrap(
-      Uint8List symmetricFileKey, SecretKey derivedKey) async {
+      List<int> symmetricFileKey, SecretKey derivedKey) async {
     final wrappingAlgorithm = Chacha20.poly1305Aead();
     final body = await wrappingAlgorithm.encrypt(symmetricFileKey,
         secretKey: derivedKey, nonce: List.generate(12, (index) => 0x00));
@@ -35,7 +35,7 @@ abstract class AgeStanza {
   }
 
   static Future<Uint8List> unwrap(
-      Uint8List wrappedKey, SecretKey derivedKey) async {
+      List<int> wrappedKey, SecretKey derivedKey) async {
     final wrappingAlgorithm = Chacha20.poly1305Aead();
     final secretBox = SecretBox.fromConcatenation(
         List.generate(12, (index) => 0x00) + wrappedKey,

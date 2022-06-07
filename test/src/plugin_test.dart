@@ -1,5 +1,3 @@
-import 'dart:typed_data';
-
 import 'package:cryptography/src/cryptography/simple_key_pair.dart';
 import 'package:dage/dage.dart';
 import 'package:test/test.dart';
@@ -7,7 +5,7 @@ import 'package:test/test.dart';
 class DummyPlugin extends AgePlugin {
   @override
   Future<AgeStanza?> createPassphraseStanza(
-      Uint8List symmetricFileKey, Uint8List salt,
+      List<int> symmetricFileKey, List<int> salt,
       {PassphraseProvider passphraseProvider =
           const PassphraseProvider()}) async {
     throw UnimplementedError();
@@ -15,7 +13,7 @@ class DummyPlugin extends AgePlugin {
 
   @override
   Future<AgeStanza?> createStanza(
-      AgeRecipient recipient, Uint8List symmetricFileKey,
+      AgeRecipient recipient, List<int> symmetricFileKey,
       [SimpleKeyPair? ephemeralKeyPair]) {
     throw UnimplementedError();
   }
@@ -26,7 +24,7 @@ class DummyPlugin extends AgePlugin {
   }
 
   @override
-  Future<AgeStanza?> parseStanza(List<String> arguments, Uint8List body,
+  Future<AgeStanza?> parseStanza(List<String> arguments, List<int> body,
       {PassphraseProvider passphraseProvider =
           const PassphraseProvider()}) async {
     throw UnimplementedError();

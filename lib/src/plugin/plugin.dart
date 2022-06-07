@@ -22,15 +22,15 @@ abstract class AgePlugin {
 
   Future<AgeKeyPair?> identityToKeyPair(AgeIdentity identity);
 
-  Future<AgeStanza?> parseStanza(List<String> arguments, Uint8List body,
+  Future<AgeStanza?> parseStanza(List<String> arguments, List<int> body,
       {PassphraseProvider passphraseProvider});
 
   Future<AgeStanza?> createStanza(
-      AgeRecipient recipient, Uint8List symmetricFileKey,
+      AgeRecipient recipient, List<int> symmetricFileKey,
       [SimpleKeyPair? ephemeralKeyPair]);
 
   Future<AgeStanza?> createPassphraseStanza(
-      Uint8List symmetricFileKey, Uint8List salt,
+      List<int> symmetricFileKey, Uint8List salt,
       {PassphraseProvider passphraseProvider});
 
   static T firstPluginSync<T>(T? Function(AgePlugin plugin) func) {
@@ -54,7 +54,7 @@ abstract class AgePlugin {
     throw Exception('None of the plugins could handle the function!');
   }
 
-  static Future<AgeStanza> stanzaParse(List<String> arguments, Uint8List body,
+  static Future<AgeStanza> stanzaParse(List<String> arguments, List<int> body,
       PassphraseProvider passphraseProvider) async {
     return firstPlugin((plugin) => plugin.parseStanza(arguments, body,
         passphraseProvider: passphraseProvider));

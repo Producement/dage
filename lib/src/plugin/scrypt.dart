@@ -21,7 +21,7 @@ class ScryptPlugin extends AgePlugin {
 
   @override
   Future<AgeStanza?> createStanza(
-      AgeRecipient recipient, Uint8List symmetricFileKey,
+      AgeRecipient recipient, List<int> symmetricFileKey,
       [SimpleKeyPair? ephemeralKeyPair]) async {
     return null;
   }
@@ -32,7 +32,7 @@ class ScryptPlugin extends AgePlugin {
   }
 
   @override
-  Future<AgeStanza?> parseStanza(List<String> arguments, Uint8List body,
+  Future<AgeStanza?> parseStanza(List<String> arguments, List<int> body,
       {PassphraseProvider passphraseProvider =
           const PassphraseProvider()}) async {
     if (arguments.isEmpty || arguments[0] != 'scrypt') {
@@ -54,7 +54,7 @@ class ScryptPlugin extends AgePlugin {
 
   @override
   Future<AgeStanza?> createPassphraseStanza(
-      Uint8List symmetricFileKey, Uint8List salt,
+      List<int> symmetricFileKey, List<int> salt,
       {PassphraseProvider passphraseProvider =
           const PassphraseProvider()}) async {
     final derivator = Scrypt();
@@ -73,8 +73,8 @@ class ScryptPlugin extends AgePlugin {
 
 class ScryptStanza extends AgeStanza {
   static const _algorithmTag = 'scrypt';
-  final Uint8List _wrappedKey;
-  final Uint8List _salt;
+  final List<int> _wrappedKey;
+  final List<int> _salt;
   final int _workFactor;
   final PassphraseProvider _passphraseProvider;
 
