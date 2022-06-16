@@ -1,13 +1,11 @@
 library age.plugin;
 
-import 'dart:typed_data';
-
 import 'package:cryptography/cryptography.dart';
 
 import '../keypair.dart';
 import '../passphrase_provider.dart';
-import 'scrypt.dart';
 import '../stanza.dart';
+import 'scrypt.dart';
 import 'x25519.dart';
 
 abstract class AgePlugin {
@@ -27,10 +25,10 @@ abstract class AgePlugin {
 
   Future<AgeStanza?> createStanza(
       AgeRecipient recipient, List<int> symmetricFileKey,
-      [SimpleKeyPair? ephemeralKeyPair]);
+      [KeyPair? ephemeralKeyPair]);
 
   Future<AgeStanza?> createPassphraseStanza(
-      List<int> symmetricFileKey, Uint8List salt,
+      List<int> symmetricFileKey, List<int> salt,
       {PassphraseProvider passphraseProvider});
 
   static T firstPluginSync<T>(T? Function(AgePlugin plugin) func) {
@@ -61,14 +59,14 @@ abstract class AgePlugin {
   }
 
   static Future<AgeStanza> stanzaCreate(
-      AgeRecipient recipient, Uint8List symmetricFileKey,
+      AgeRecipient recipient, List<int> symmetricFileKey,
       [SimpleKeyPair? ephemeralKeyPair]) async {
     return firstPlugin((plugin) =>
         plugin.createStanza(recipient, symmetricFileKey, ephemeralKeyPair));
   }
 
-  static Future<AgeStanza> passphraseStanzaCreate(Uint8List symmetricFileKey,
-      Uint8List salt, PassphraseProvider passphraseProvider) async {
+  static Future<AgeStanza> passphraseStanzaCreate(List<int> symmetricFileKey,
+      List<int> salt, PassphraseProvider passphraseProvider) async {
     return firstPlugin((plugin) => plugin.createPassphraseStanza(
         symmetricFileKey, salt,
         passphraseProvider: passphraseProvider));

@@ -9,9 +9,9 @@ import 'package:pointycastle/pointycastle.dart';
 
 import '../keypair.dart';
 import '../passphrase_provider.dart';
+import '../stanza.dart';
 import 'encoding.dart';
 import 'plugin.dart';
-import '../stanza.dart';
 
 class ScryptPlugin extends AgePlugin {
   static const _info = 'age-encryption.org/v1/scrypt';
@@ -22,7 +22,7 @@ class ScryptPlugin extends AgePlugin {
   @override
   Future<AgeStanza?> createStanza(
       AgeRecipient recipient, List<int> symmetricFileKey,
-      [SimpleKeyPair? ephemeralKeyPair]) async {
+      [KeyPair? ephemeralKeyPair]) async {
     return null;
   }
 

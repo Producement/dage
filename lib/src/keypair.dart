@@ -24,7 +24,7 @@ class AgeIdentity {
   const AgeIdentity(this._privateKeyPrefix, this._privateKey);
 
   factory AgeIdentity.fromBech32(String bechPrivateKey) {
-    final privateKey = Bech32Decoder().convert(bechPrivateKey);
+    final privateKey = Bech32Decoder().convert(bechPrivateKey, 1024);
     return AgeIdentity(privateKey.hrp,
         Uint8List.fromList(_convertBits(privateKey.data, 5, 8, false)));
   }
@@ -52,7 +52,7 @@ class AgeRecipient {
   String get prefix => _publicKeyPrefix;
 
   factory AgeRecipient.fromBech32(String bechPublicKey) {
-    final publicKey = Bech32Decoder().convert(bechPublicKey);
+    final publicKey = Bech32Decoder().convert(bechPublicKey, 1024);
     return AgeRecipient(publicKey.hrp,
         Uint8List.fromList(_convertBits(publicKey.data, 5, 8, false)));
   }
@@ -60,7 +60,7 @@ class AgeRecipient {
 
 String _convertToBech32(String prefix, Uint8List key) {
   final bech32 = Bech32(prefix, _convertBits(key, 8, 5, true));
-  return Bech32Encoder().convert(bech32);
+  return Bech32Encoder().convert(bech32, 1024);
 }
 
 List<int> _convertBits(List<int> data, int from, int to, bool pad) {

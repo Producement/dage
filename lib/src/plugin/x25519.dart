@@ -50,12 +50,16 @@ class X25519AgePlugin extends AgePlugin {
   @override
   Future<AgeStanza?> createStanza(
       AgeRecipient recipient, List<int> symmetricFileKey,
-      [SimpleKeyPair? ephemeralKeyPair]) async {
+      [KeyPair? ephemeralKeyPair]) async {
     if (recipient.prefix != publicKeyPrefix) {
       return null;
     }
+    if (ephemeralKeyPair != null && ephemeralKeyPair is! SimpleKeyPair) {
+      throw Exception(
+          'Keypair is of wrong type ${ephemeralKeyPair.runtimeType}');
+    }
     return X25519AgeStanza.create(
-        recipient.bytes, symmetricFileKey, ephemeralKeyPair);
+        recipient.bytes, symmetricFileKey, ephemeralKeyPair as SimpleKeyPair?);
   }
 
   @override

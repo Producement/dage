@@ -1,4 +1,4 @@
-import 'package:cryptography/src/cryptography/simple_key_pair.dart';
+import 'package:cryptography/cryptography.dart';
 import 'package:dage/dage.dart';
 import 'package:test/test.dart';
 
@@ -14,7 +14,7 @@ class DummyPlugin extends AgePlugin {
   @override
   Future<AgeStanza?> createStanza(
       AgeRecipient recipient, List<int> symmetricFileKey,
-      [SimpleKeyPair? ephemeralKeyPair]) {
+      [KeyPair? ephemeralKeyPair]) {
     throw UnimplementedError();
   }
 

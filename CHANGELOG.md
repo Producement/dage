@@ -1,3 +1,7 @@
+## 1.0.6
+
+- Enable longer keys with Bech32.
+
 ## 1.0.5
 
 - Use List<int> for parameters, Uint8List for return types.
