@@ -74,9 +74,11 @@ packages:
   cryptography:
     dependency: "direct main"
     description:
-      name: cryptography
-      url: "https://pub.dartlang.org"
-    source: hosted
+      path: cryptography
+      ref: master
+      resolved-ref: "31a9c9b833fc23c9e0e5db436186451857ceb2d8"
+      url: "https://github.com/Producement/cryptography.git"
+    source: git
     version: "2.0.5"
   file:
     dependency: transitive
