@@ -15,7 +15,7 @@ jobs:
       - name: Install dependencies
         run: dart pub get
       - name: Compile
-        run: dart compile exe bin/dage.dart -o ${{fromJSON(matrix.build).exe}}
+        run: dart compile exe bin/dage.dart -o bin/${{fromJSON(matrix.build).exe}}
       - name: Upload artifact
         uses: actions/upload-artifact@v3
         with:
