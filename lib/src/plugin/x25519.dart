@@ -138,8 +138,9 @@ class X25519AgeStanza extends AgeStanza {
     if (keyPair == null) {
       throw Exception('Keypair not provided!');
     }
-    final simpleKeyPair = SimpleKeyPairData(
-        keyPair.identityBytes!, keyPair.recipientBytes,
+    final simpleKeyPair = SimpleKeyPairData(keyPair.identityBytes!,
+        publicKey:
+            SimplePublicKey(keyPair.recipientBytes, type: KeyPairType.x25519),
         type: KeyPairType.x25519);
     final ephemeralPublicKey =
         SimplePublicKey(_ephemeralPublicKey, type: KeyPairType.x25519);
