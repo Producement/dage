@@ -9,32 +9,16 @@ jobs:
     strategy:
       matrix:
         os: [windows-latest, ubuntu-latest, macos-latest]
+        exe: [dage-windows-amd64.exe, dage-linux-amd64, dage-darwin-amd64]
     steps:
       - uses: actions/checkout@v2
       - uses: dart-lang/setup-dart@v1.3
-
       - name: Install dependencies
         run: dart pub get
       - name: Compile
-        run: dart compile exe bin/dage.dart
-      - name: Upload linux artifact
-        if: matrix.os == 'ubuntu-latest'
-        run: mv bin/dage.exe bin/dage-linux-amd64
+        run: dart compile exe bin/dage.dart -o ${{ matrix.exe }}
+      - name: Upload artifact
         uses: actions/upload-artifact@v3
         with:
-          name: dage-linux-amd64
-          path: bin/dage-linux-amd64
-      - name: Upload mac artifact
-        if: matrix.os == 'macos-latest'
-        run: mv bin/dage.exe bin/dage-darwin-amd64
-        uses: actions/upload-artifact@v3
-        with:
-          name: dage-darwin-amd64
-          path: bin/dage-darwin-amd64
-      - name: Upload windows artifact
-        if: matrix.os == 'windows-latest'
-        run: mv bin/dage.exe bin/dage-windows-amd64.exe
-        uses: actions/upload-artifact@v3
-        with:
-          name: dage-windows-amd64
-          path: bin/dage-windows-amd64.exe
+          name: ${{ matrix.exe }}
+          path: bin/${{ matrix.exe }}
