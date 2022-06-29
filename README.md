@@ -1,6 +1,7 @@
 <p align="center"><img alt="The age logo, an wireframe of St. Peters dome in Rome, with the text: age, file encryption" width="600" src="https://user-images.githubusercontent.com/1225294/132245842-fda4da6a-1cea-4738-a3da-2dc860861c98.png"></p>
 
 # dage: Dart implementation of age
+[![pub package](https://img.shields.io/pub/v/dage.svg)](https://pub.dev/packages/dage)
 
 The format specification is at [age-encryption.org/v1](https://age-encryption.org/v1).
 age was designed by [@Benjojo12](https://twitter.com/Benjojo12) and
