@@ -16,7 +16,7 @@ import 'passphrase_provider.dart';
 
 final Logger _logger = Logger('AgeDecrypt');
 
-final _macSize = 16;
+const _macSize = 16;
 
 Stream<List<int>> decrypt(Stream<List<int>> content, List<AgeKeyPair> keyPairs,
     {PassphraseProvider passphraseProvider =
@@ -59,7 +59,7 @@ Stream<List<int>> decryptWithPassphrase(Stream<List<int>> content,
     throw Exception('Only one recipient allowed!');
   }
   final stanza = header.stanzas.first;
-  Uint8List symmetricFileKey = await stanza.decryptedFileKey(null);
+  final Uint8List symmetricFileKey = await stanza.decryptedFileKey(null);
   await header.checkMac(symmetricFileKey);
   yield* _decryptPayload(split.payload.stream,
       symmetricFileKey: symmetricFileKey);
@@ -83,7 +83,7 @@ Stream<List<int>> _decryptPayload(Stream<List<int>> payload,
         info: 'payload'.codeUnits);
     final encryptionAlgorithm = Chacha20.poly1305Aead();
 
-    final chunkWithMacSize = chunkSize + _macSize;
+    const chunkWithMacSize = chunkSize + _macSize;
     Uint8List chunk;
     do {
       chunk = await chunkedIterator.readBytes(chunkWithMacSize);

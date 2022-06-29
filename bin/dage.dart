@@ -26,7 +26,7 @@ void main(List<String> arguments) async {
   try {
     if (results['encrypt']) {
       final recipients = results['recipient'] as List<String>;
-      var keyPairs =
+      final keyPairs =
           recipients.map((recipient) => AgeRecipient.fromBech32(recipient));
       final isPassphraseEncryption = results['passphrase'] as bool;
       if (keyPairs.isEmpty && !isPassphraseEncryption) {

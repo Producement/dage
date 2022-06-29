@@ -1,3 +1,7 @@
+## 1.0.7
+
+- Improve code quality.
+
 ## 1.0.6
 
 - Enable longer keys with Bech32.

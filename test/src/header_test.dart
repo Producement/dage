@@ -9,7 +9,7 @@ import 'fixture.dart';
 void main() {
   setUpAll(() => setupLogging());
 
-  String serialised = '''age-encryption.org/v1
+  const String serialised = '''age-encryption.org/v1
 -> X25519 L+V9o0fNYkMVKNqsX7spBzD/9oSvxM/C7ZCZX1jLO3Q
 1cT9u0o55LQ9SVnYROZh6SqATr3CGseHSlgf4YMD4LE
 --- hnTNhYFvWIIs53UDE1UqyW/PYyLD3zFmDJPTMS7/s8U''';

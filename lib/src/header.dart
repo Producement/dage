@@ -13,7 +13,7 @@ import 'stanza.dart';
 class AgeHeader {
   static final logger = Logger('AgeHeader');
   static const _version = 'age-encryption.org/v1';
-  static final _macSeparator = '---';
+  static const _macSeparator = '---';
   final List<AgeStanza> _stanzas;
   final String _mac;
 

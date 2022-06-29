@@ -1,5 +1,11 @@
 name: Dart
-on: [push]
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
 jobs:
   check:
     runs-on: ubuntu-latest
@@ -16,5 +22,21 @@ jobs:
       - name: Analyze
         run: dart analyze
 
+      - name: Activate coverage
+        if: github.event_name == 'pull_request'
+        run: dart pub global activate coverage
+
+      - name: Test with coverage
+        if: github.event_name == 'pull_request'
+        run: dart pub global run coverage:test_with_coverage
+
       - name: Test
+        if: github.event_name != 'pull_request'
         run: dart test
+
+      - name: Collect coverage
+        uses: romeovs/lcov-reporter-action@v0.2.16
+        if: github.event_name == 'pull_request'
+        with:
+          lcov-file: ./coverage/lcov.info
+          github-token: ${{ secrets.PAT }}
