@@ -19,19 +19,22 @@ jobs:
         run: dart compile exe bin/dage.dart
       - name: Upload linux artifact
         if: matrix.os == 'ubuntu-latest'
+        run: mv bin/dage.exe bin/dage-linux-amd64
         uses: actions/upload-artifact@v3
         with:
           name: dage-linux-amd64
-          path: bin/dage.exe
+          path: bin/dage-linux-amd64
       - name: Upload mac artifact
         if: matrix.os == 'macos-latest'
+        run: mv bin/dage.exe bin/dage-darwin-amd64
         uses: actions/upload-artifact@v3
         with:
           name: dage-darwin-amd64
-          path: bin/dage.exe
+          path: bin/dage-darwin-amd64
       - name: Upload windows artifact
         if: matrix.os == 'windows-latest'
+        run: mv bin/dage.exe bin/dage-windows-amd64.exe
         uses: actions/upload-artifact@v3
         with:
           name: dage-windows-amd64
-          path: bin/dage.exe
+          path: bin/dage-windows-amd64.exe
