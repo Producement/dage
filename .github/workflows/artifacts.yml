@@ -5,10 +5,10 @@ on:
       - main
 jobs:
   build:
-    runs-on: ${{ matrix.runs-on }}
+    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        runs-on: [windows-latest, ubuntu-latest, macos-latest]
+        os: [windows-latest, ubuntu-latest, macos-latest]
     steps:
       - uses: actions/checkout@v2
       - uses: dart-lang/setup-dart@v1.3
