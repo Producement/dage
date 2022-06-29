@@ -30,6 +30,10 @@ class PassphraseProvider {
   }
 
   Future<String> _readUntilNewLine(File tty) async {
-    return tty.openRead().map(utf8.decode).transform(LineSplitter()).first;
+    return tty
+        .openRead()
+        .map(utf8.decode)
+        .transform(const LineSplitter())
+        .first;
   }
 }

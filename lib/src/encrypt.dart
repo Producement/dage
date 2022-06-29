@@ -12,7 +12,7 @@ import 'random.dart';
 import 'stanza.dart';
 
 final Logger _logger = Logger('AgeEncrypt');
-final chunkSize = 64 * 1024; //64KiB
+const chunkSize = 64 * 1024; //64KiB
 
 Stream<List<int>> encryptWithPassphrase(Stream<List<int>> payload,
     {AgeRandom random = const AgeRandom(),

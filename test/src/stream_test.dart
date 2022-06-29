@@ -16,13 +16,13 @@ void main() {
   });
 
   test('parses complex header', () async {
-    final headerValue = '''age-encryption.org/v1
+    const headerValue = '''age-encryption.org/v1
 -> X25519 L+V9o0fNYkMVKNqsX7spBzD/9oSvxM/C7ZCZX1jLO3Q
 5JB0/RnLXiJHL29Bg7V1kWZX5+WaM8KjNryAX74lJQg
 -> scrypt zzYuo2y6OED2CG3D53V0fw 18
 bDv3uo69Okm5eK3/EgDNcG2DJWng6CvAqIVEzxM4Qmo
 --- B8KHU7wT6kOr8cgWResfbN3irfAO3yZpt0aoR026YHs''';
-    final payloadValue = '''$headerValue
+    const payloadValue = '''$headerValue
 payload''';
     final stream = AgeStream(Stream.value(payloadValue.codeUnits));
     final header = await stream.header.stream.toList();

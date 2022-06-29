@@ -10,7 +10,7 @@ import 'x25519.dart';
 
 abstract class AgePlugin {
   static final List<AgePlugin> _plugins =
-      List.of([X25519AgePlugin(), ScryptPlugin()]);
+      List.of([const X25519AgePlugin(), const ScryptPlugin()]);
 
   const AgePlugin();
 

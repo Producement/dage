@@ -9,7 +9,7 @@ import 'fixture.dart';
 void main() {
   setUpAll(() => setupLogging());
 
-  final plugin = ScryptPlugin();
+  const plugin = ScryptPlugin();
   test('parse stanza', () async {
     final stanza = await plugin.parseStanza(
         ['scrypt', 'zzYuo2y6OED2CG3D53V0fw', '18'],

@@ -9,7 +9,7 @@ import 'fixture.dart';
 void main() {
   setUpAll(() => setupLogging());
 
-  final serializedStanza =
+  const serializedStanza =
       '-> X25519 L+V9o0fNYkMVKNqsX7spBzD/9oSvxM/C7ZCZX1jLO3Q\n'
       '1cT9u0o55LQ9SVnYROZh6SqATr3CGseHSlgf4YMD4LE';
   test('create age recipient stanza', () async {

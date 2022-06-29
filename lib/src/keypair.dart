@@ -66,8 +66,8 @@ String _convertToBech32(String prefix, Uint8List key) {
 List<int> _convertBits(List<int> data, int from, int to, bool pad) {
   var acc = 0;
   var bits = 0;
-  var result = <int>[];
-  var maxv = (1 << to) - 1;
+  final result = <int>[];
+  final maxv = (1 << to) - 1;
 
   for (var v in data) {
     if (v < 0 || (v >> from) != 0) {

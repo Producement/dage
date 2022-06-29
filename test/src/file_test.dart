@@ -25,7 +25,7 @@ void main() {
 
   test('encrypt', () async {
     final ephemeralKeyPair = await algorithm.newKeyPairFromSeed(Uint8List(32));
-    var encrypted = encrypt(Stream.value('sinu ema'.codeUnits), [recipient],
+    final encrypted = encrypt(Stream.value('sinu ema'.codeUnits), [recipient],
         random: ConstAgeRandom(), keyPair: ephemeralKeyPair);
     final response = await encrypted.toList();
     expect(response.flattened, orderedEquals(encryptedFile));
@@ -40,14 +40,14 @@ void main() {
   test('encrypts and decrypts multiple chunks', () async {
     final bigFile =
         Uint8List.fromList(List.generate(1024 * 100, (index) => 0x01));
-    var encrypted = encrypt(Stream.value(bigFile), [recipient]);
+    final encrypted = encrypt(Stream.value(bigFile), [recipient]);
     final decrypted = decrypt(encrypted, [recipientKeyPair]);
     final response = await decrypted.toList();
     expect(response.flattened, orderedEquals(bigFile));
   });
 
   test('encrypts and decrypts with passphrase', () async {
-    var encrypted = encryptWithPassphrase(
+    final encrypted = encryptWithPassphrase(
         Stream.value(Uint8List.fromList('sinu ema'.codeUnits)),
         passphraseProvider: ConstantPassphraseProvider());
     final decrypted = decryptWithPassphrase(encrypted,
