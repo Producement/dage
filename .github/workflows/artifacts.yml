@@ -5,20 +5,19 @@ on:
       - main
 jobs:
   build:
-    runs-on: ${{ matrix.os }}
+    runs-on: ${{fromJSON(matrix.build).os}}
     strategy:
       matrix:
-        os: [windows-latest, ubuntu-latest, macos-latest]
-        exe: [dage-windows-amd64.exe, dage-linux-amd64, dage-darwin-amd64]
+        build: ['{"os": "windows-latest", "exe": "dage-windows-amd64.exe"}', '{"os": "ubuntu-latest", "exe": "dage-linux-amd64"}', '{"os": "macos-latest", "exe": "dage-darwin-amd64"}']
     steps:
       - uses: actions/checkout@v2
       - uses: dart-lang/setup-dart@v1.3
       - name: Install dependencies
         run: dart pub get
       - name: Compile
-        run: dart compile exe bin/dage.dart -o ${{ matrix.exe }}
+        run: dart compile exe bin/dage.dart -o ${{fromJSON(matrix.build).exe}}
       - name: Upload artifact
         uses: actions/upload-artifact@v3
         with:
-          name: ${{ matrix.exe }}
-          path: bin/${{ matrix.exe }}
+          name: ${{fromJSON(matrix.build).exe}}
+          path: bin/${{fromJSON(matrix.build).exe}}
