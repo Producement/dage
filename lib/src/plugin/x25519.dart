@@ -146,7 +146,10 @@ class X25519AgeStanza extends AgeStanza {
         SimplePublicKey(_ephemeralPublicKey, type: KeyPairType.x25519);
     final sharedSecret = await X25519AgePlugin.algorithm.sharedSecretKey(
         keyPair: simpleKeyPair, remotePublicKey: ephemeralPublicKey);
-
+    if ((await sharedSecret.extractBytes())
+        .every((element) => element == 0x00)) {
+      throw Exception('All shared secret bytes are 0x00!');
+    }
     final hkdfAlgorithm = Hkdf(
       hmac: Hmac(Sha256()),
       outputLength: 32,

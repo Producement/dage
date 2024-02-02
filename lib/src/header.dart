@@ -1,5 +1,6 @@
 library age.src;
 
+import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:collection/collection.dart';
@@ -9,6 +10,7 @@ import 'package:logging/logging.dart';
 import 'plugin/encoding.dart';
 import 'passphrase_provider.dart';
 import 'stanza.dart';
+import 'stream.dart';
 
 class AgeHeader {
   static final logger = Logger('AgeHeader');
@@ -21,6 +23,8 @@ class AgeHeader {
 
   List<AgeStanza> get stanzas => _stanzas;
 
+  Future<String> get withoutMac => AgeHeader.headerWithoutMac(stanzas);
+
   static Future<AgeHeader> create(
       List<AgeStanza> stanzas, Uint8List symmetricFileKey) async {
     final mac =
@@ -29,10 +33,18 @@ class AgeHeader {
     return AgeHeader._(stanzas, mac);
   }
 
+  static Future<AgeHeader> parseContent(AgeStream content,
+      {PassphraseProvider passphraseProvider =
+          const PassphraseProvider()}) async {
+    final rawHeader = await content.header.stream.toList();
+    final headerString = utf8.decode(rawHeader.flattened.toList());
+    return parse(headerString, passphraseProvider: passphraseProvider);
+  }
+
   static Future<AgeHeader> parse(String header,
       {PassphraseProvider passphraseProvider =
           const PassphraseProvider()}) async {
-    logger.finer('Header: $header');
+    logger.finer('Header\n$header');
     final headerLines = header.split('\n');
     final versionLine = headerLines[0];
     if (versionLine != _version) {
@@ -59,6 +71,7 @@ class AgeHeader {
       header.writeln(await stanza.serialize());
     }
     header.write(_macSeparator);
+    logger.fine('Header without mac\n${header.toString()}');
     return header.toString();
   }
 
@@ -66,7 +79,9 @@ class AgeHeader {
     final mac =
         await _calculateMac(await headerWithoutMac(_stanzas), symmetricFileKey);
     logger.fine('Calculated mac: $mac, parsed mac: $_mac');
-    assert(mac == _mac, 'Incorrect mac');
+    if (mac != _mac) {
+      throw Exception('Incorrect mac');
+    }
   }
 
   static Future<String> _calculateMac(

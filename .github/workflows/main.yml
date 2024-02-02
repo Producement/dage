@@ -10,8 +10,8 @@ jobs:
   check:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - uses: dart-lang/setup-dart@v1.3
+      - uses: actions/checkout@v4
+      - uses: dart-lang/setup-dart@v1
 
       - name: Install dependencies
         run: dart pub get
@@ -40,3 +40,11 @@ jobs:
         with:
           lcov-file: ./coverage/lcov.info
           github-token: ${{ secrets.PAT }}
+
+      - name: Test Report
+        uses: dorny/test-reporter@v1
+        if: success() || failure() && github.event_name != 'pull_request'
+        with:
+          name: Tests
+          path: reports/test-results.json
+          reporter: dart-json

@@ -1,10 +1,10 @@
 name: dage
 description: age encryption implementation using Dart. age is a modern file encryption format with multiple pluggable recipients, and seekable streaming encryption.
-version: 1.0.7
+version: 1.0.8
 homepage: https://github.com/Producement/dage
 
 environment:
-  sdk: '>=2.16.0 <4.0.0'
+  sdk: '>=2.17.0 <4.0.0'
 
 dependencies:
   args: ^2.4.2
@@ -17,5 +17,7 @@ dependencies:
   pointycastle: ^3.7.4
 
 dev_dependencies:
+  path: ^1.9.0
   lints: ^3.0.0
   test: ^1.25.2
+  crypto: ^3.0.3

@@ -1,5 +1,6 @@
 library age.src;
 
+import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:cryptography/cryptography.dart';
@@ -17,6 +18,9 @@ abstract class AgeStanza {
           const PassphraseProvider()}) async {
     final lines = content.split('\n');
     final arguments = lines[0].replaceFirst('-> ', '').split(' ');
+    if (arguments.any((arg) => arg.isEmpty)) {
+      throw Exception('Argument for stanza is empty!');
+    }
     final body = lines.sublist(1).join('').replaceAll('\n', '');
     return AgePlugin.stanzaParse(
         arguments, base64RawDecode(body), passphraseProvider);
@@ -43,5 +47,32 @@ abstract class AgeStanza {
         nonceLength: 12);
     return Uint8List.fromList(
         await wrappingAlgorithm.decrypt(secretBox, secretKey: derivedKey));
+  }
+}
+
+class UnknownStanza extends AgeStanza {
+  final List<String> _arguments;
+  final List<int> _body;
+
+  UnknownStanza(this._arguments, this._body);
+
+  @override
+  Future<Uint8List> decryptedFileKey(AgeKeyPair? keyPair) {
+    throw Exception('Decryption not supported for this stanza!');
+  }
+
+  @override
+  Future<String> serialize() async {
+    return '-> ${_arguments.join(' ')}\n${_wrapped(base64Encode(_body))}';
+  }
+
+  String _wrapped(String str) {
+    if (str.isEmpty) {
+      return str;
+    }
+    if (str.length > 64) {
+      return '${str.substring(0, 64)}\n${_wrapped(str.substring(64))}';
+    }
+    return '$str\n';
   }
 }

@@ -1,3 +1,7 @@
+## 1.0.8
+
+- Fixes related to the testkit vectors.
+
 ## 1.0.7
 
 - Improve code quality.

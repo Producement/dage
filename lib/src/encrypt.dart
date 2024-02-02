@@ -51,6 +51,19 @@ Stream<List<int>> encrypt(
       symmetricFileKey: symmetricFileKey, payloadNonce: payloadNonce);
 }
 
+List<int> _toBinaryCounter(int chunkCounter) {
+  const byteCount = 11;
+  final byteList = List<int>.filled(byteCount, 0);
+  // Populate the list with bytes from the integer
+  for (int i = byteCount - 1; i >= 0; i--) {
+    // Extract each byte using bitwise operations
+    byteList[i] = (chunkCounter & 0xFF);
+    // Shift the integer to the right by 8 bits to process the next byte
+    chunkCounter >>= 8;
+  }
+  return byteList;
+}
+
 Stream<List<int>> _encryptPayload(Stream<List<int>> payload,
     {required Uint8List symmetricFileKey,
     required Uint8List payloadNonce}) async* {
@@ -67,17 +80,19 @@ Stream<List<int>> _encryptPayload(Stream<List<int>> payload,
       info: 'payload'.codeUnits);
   final encryptionAlgorithm = Chacha20.poly1305Aead();
   final chunkedIterator = ChunkedStreamReader(payload);
+  var chunkCounter = 0;
   try {
     Uint8List chunk;
     do {
       chunk = await chunkedIterator.readBytes(chunkSize);
       final nonceEnd = (chunk.length != chunkSize) ? [0x01] : [0x00];
-      final chunkNonce = List.generate(11, (index) => 0) + nonceEnd;
+      final chunkNonce = _toBinaryCounter(chunkCounter) + nonceEnd;
       _logger.finer('Chunk nonce: $chunkNonce');
       _logger.finer('Chunk length: ${chunk.length} (max: $chunkSize)');
       final secretBox = await encryptionAlgorithm.encrypt(chunk,
           nonce: chunkNonce, secretKey: payloadKey);
       _logger.finer('Chunk mac: ${secretBox.mac.bytes}');
+      chunkCounter = chunkCounter + 1;
       yield secretBox.concatenation(nonce: false);
     } while (chunk.length == chunkSize);
   } finally {

@@ -1,10 +1,8 @@
 library age.src;
 
-import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:async/async.dart';
-import 'package:collection/collection.dart';
 import 'package:cryptography/cryptography.dart';
 import 'package:dage/src/stream.dart';
 import 'package:logging/logging.dart';
@@ -22,9 +20,7 @@ Stream<List<int>> decrypt(Stream<List<int>> content, List<AgeKeyPair> keyPairs,
     {PassphraseProvider passphraseProvider =
         const PassphraseProvider()}) async* {
   final split = AgeStream(content);
-  final rawHeader = await split.header.stream.toList();
-  final header = await AgeHeader.parse(
-      utf8.decode(rawHeader.flattened.toList()),
+  final header = await AgeHeader.parseContent(split,
       passphraseProvider: passphraseProvider);
   Uint8List? symmetricFileKey;
   _logger.fine(
@@ -33,8 +29,8 @@ Stream<List<int>> decrypt(Stream<List<int>> content, List<AgeKeyPair> keyPairs,
     for (var stanza in header.stanzas) {
       try {
         symmetricFileKey = await stanza.decryptedFileKey(keyPair);
-      } catch (e, stacktrace) {
-        _logger.warning('Did not create key', e, stacktrace);
+      } catch (e) {
+        _logger.info('Keypair was not valid for this stanza');
         //Ignore
       }
     }
@@ -51,18 +47,29 @@ Stream<List<int>> decryptWithPassphrase(Stream<List<int>> content,
     {PassphraseProvider passphraseProvider =
         const PassphraseProvider()}) async* {
   final split = AgeStream(content);
-  final rawHeader = await split.header.stream.toList();
-  final header = await AgeHeader.parse(
-      utf8.decode(rawHeader.flattened.toList()),
+  final header = await AgeHeader.parseContent(split,
       passphraseProvider: passphraseProvider);
   if (header.stanzas.length != 1) {
     throw Exception('Only one recipient allowed!');
   }
   final stanza = header.stanzas.first;
-  final Uint8List symmetricFileKey = await stanza.decryptedFileKey(null);
+  final symmetricFileKey = await stanza.decryptedFileKey(null);
   await header.checkMac(symmetricFileKey);
   yield* _decryptPayload(split.payload.stream,
       symmetricFileKey: symmetricFileKey);
+}
+
+List<int> _toBinaryCounter(int chunkCounter) {
+  const byteCount = 11;
+  final byteList = List<int>.filled(byteCount, 0);
+  // Populate the list with bytes from the integer
+  for (int i = byteCount - 1; i >= 0; i--) {
+    // Extract each byte using bitwise operations
+    byteList[i] = (chunkCounter & 0xFF);
+    // Shift the integer to the right by 8 bits to process the next byte
+    chunkCounter >>= 8;
+  }
+  return byteList;
 }
 
 Stream<List<int>> _decryptPayload(Stream<List<int>> payload,
@@ -76,19 +83,39 @@ Stream<List<int>> _decryptPayload(Stream<List<int>> payload,
 
   try {
     final payloadNonce = await chunkedIterator.readBytes(16);
+    if (payloadNonce.isEmpty) {
+      throw Exception('Payload nonce is missing!');
+    }
     _logger.finer('Payload nonce: $payloadNonce');
     final payloadKey = await hkdfAlgorithm.deriveKey(
         secretKey: SecretKeyData(symmetricFileKey),
         nonce: payloadNonce,
         info: 'payload'.codeUnits);
+
     final encryptionAlgorithm = Chacha20.poly1305Aead();
 
     const chunkWithMacSize = chunkSize + _macSize;
-    Uint8List chunk;
+    Uint8List chunk = await chunkedIterator.readBytes(chunkWithMacSize);
+    Uint8List? nextChunk;
+    int chunkCounter = 0;
     do {
-      chunk = await chunkedIterator.readBytes(chunkWithMacSize);
-      final nonceEnd = (chunk.length != chunkWithMacSize) ? [0x01] : [0x00];
-      final chunkNonce = List.generate(11, (index) => 0) + nonceEnd;
+      if (nextChunk != null) {
+        chunk = nextChunk;
+      }
+      if (chunk.isEmpty && chunkCounter > 0) {
+        break;
+      }
+      if (chunk.length < _macSize) {
+        throw Exception('Incorrect chunk size!');
+      }
+      if (chunk.length == chunkWithMacSize) {
+        nextChunk = await chunkedIterator.readBytes(chunkWithMacSize);
+      }
+      final nonceEnd =
+          (chunk.length != chunkWithMacSize || nextChunk?.isNotEmpty != true)
+              ? [0x01]
+              : [0x00];
+      final chunkNonce = _toBinaryCounter(chunkCounter) + nonceEnd;
       _logger.finer('Chunk nonce: $chunkNonce');
       _logger.finer('Chunk length: ${chunk.length}  (max: $chunkWithMacSize)');
       _logger.finer('Chunk mac: ${chunk.skip(chunk.length - _macSize)}');
@@ -96,6 +123,13 @@ Stream<List<int>> _decryptPayload(Stream<List<int>> payload,
           nonceLength: 12, macLength: _macSize);
       final decrypted =
           await encryptionAlgorithm.decrypt(secretBox, secretKey: payloadKey);
+      _logger.finer('Chunk decrypted');
+      if (chunk.length != chunkWithMacSize &&
+          decrypted.isEmpty &&
+          chunkCounter != 0) {
+        throw Exception('Last chunk can not be empty!');
+      }
+      chunkCounter = chunkCounter + 1;
       yield decrypted;
     } while (chunk.length == chunkWithMacSize);
   } finally {

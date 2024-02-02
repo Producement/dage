@@ -8,6 +8,12 @@ import '../stanza.dart';
 import 'scrypt.dart';
 import 'x25519.dart';
 
+class PluginNotFoundException implements Exception {
+  final String cause;
+
+  PluginNotFoundException(this.cause);
+}
+
 abstract class AgePlugin {
   static final List<AgePlugin> _plugins =
       List.of([const X25519AgePlugin(), const ScryptPlugin()]);
@@ -38,7 +44,8 @@ abstract class AgePlugin {
         return result;
       }
     }
-    throw Exception('None of the plugins could handle the function!');
+    throw PluginNotFoundException(
+        'None of the plugins could handle the function!');
   }
 
   static Future<T> firstPlugin<T>(
@@ -49,13 +56,18 @@ abstract class AgePlugin {
         return result;
       }
     }
-    throw Exception('None of the plugins could handle the function!');
+    throw PluginNotFoundException(
+        'None of the plugins could handle the function!');
   }
 
   static Future<AgeStanza> stanzaParse(List<String> arguments, List<int> body,
       PassphraseProvider passphraseProvider) async {
-    return firstPlugin((plugin) => plugin.parseStanza(arguments, body,
-        passphraseProvider: passphraseProvider));
+    try {
+      return await firstPlugin((plugin) => plugin.parseStanza(arguments, body,
+          passphraseProvider: passphraseProvider));
+    } on PluginNotFoundException {
+      return UnknownStanza(arguments, body);
+    }
   }
 
   static Future<AgeStanza> stanzaCreate(

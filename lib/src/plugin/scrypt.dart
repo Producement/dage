@@ -49,6 +49,9 @@ class ScryptPlugin extends AgePlugin {
     if (body.length != 32) {
       throw Exception('Body size is incorrect!');
     }
+    if (workFactor > 22 || workFactor < 1) {
+      throw Exception('Work factor should be positive and less than 23!');
+    }
     return ScryptStanza(body, salt, workFactor, passphraseProvider);
   }
 

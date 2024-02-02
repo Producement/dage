@@ -18,19 +18,24 @@ class AgeStream {
       } else {
         final headerBuffer = <int>[];
         final payloadBuffer = <int>[];
-        for (var byte in bytes) {
+        for (final byte in bytes) {
           if (isPayload) {
             payloadBuffer.add(byte);
           } else {
+            // Searching for a mac (newline followed by three dashes)
             if (!isMac) {
-              if (byte == 0x0a && index == 0) {
+              if (byte == 0x0a) {
+                index = 1;
+                // Newline found
+              } else if (byte == 0x2D && index > 0) {
+                // Dash 1-3 found
                 index++;
-              } else if (byte == 0x2D && index > 0 && index < 3) {
-                index++;
-              } else {
+              } else if (index != 0) {
+                // No dash or newline, reset state
                 index = 0;
               }
-              if (index == 3) {
+              // Found a newline followed by three dashes, we found mac
+              if (index == 4) {
                 logger.fine(
                     'Found the mac line. Reading to header until newline.');
                 isMac = true;
@@ -48,6 +53,9 @@ class AgeStream {
         payload.add(payloadBuffer);
       }
     }, onDone: () {
+      if (!isMac) {
+        header.addError(Exception('Mac line not found in header!'));
+      }
       payload.close();
       header.close();
     }, onError: (e) {
