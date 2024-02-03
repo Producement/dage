@@ -11,7 +11,7 @@ jobs:
       matrix:
         build: [ '{"os": "windows-latest", "exe": "dage-windows-amd64.exe"}', '{"os": "ubuntu-latest", "exe": "dage-linux-amd64"}', '{"os": "macos-latest", "exe": "dage-darwin-amd64"}' ]
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - uses: dart-lang/setup-dart@v1.3
       - name: Install dependencies
         run: dart pub get
