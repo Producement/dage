@@ -6,7 +6,8 @@ on:
       - "v*.*.*"
 
 jobs:
-  build:
+  release:
+    name: 'Release'
     runs-on: ubuntu-latest
     steps:
       - name: Wait for artifacts
@@ -15,6 +16,16 @@ jobs:
           ref: ${{ github.sha }}
           check-name: 'Artifacts uploaded'
           repo-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Wait for tests
+        uses: lewagon/wait-on-check-action@v1.3.3
+        with:
+          ref: ${{ github.sha }}
+          check-name: 'Test'
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: dage-*
       - name: Release
         uses: softprops/action-gh-release@v1
         with:
