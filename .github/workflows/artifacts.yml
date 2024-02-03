@@ -5,10 +5,11 @@ on:
       - main
 jobs:
   build:
+    name: Build for {{ fromJSON(matrix.build).os }}
     runs-on: ${{fromJSON(matrix.build).os}}
     strategy:
       matrix:
-        build: ['{"os": "windows-latest", "exe": "dage-windows-amd64.exe"}', '{"os": "ubuntu-latest", "exe": "dage-linux-amd64"}', '{"os": "macos-latest", "exe": "dage-darwin-amd64"}']
+        build: [ '{"os": "windows-latest", "exe": "dage-windows-amd64.exe"}', '{"os": "ubuntu-latest", "exe": "dage-linux-amd64"}', '{"os": "macos-latest", "exe": "dage-darwin-amd64"}' ]
     steps:
       - uses: actions/checkout@v2
       - uses: dart-lang/setup-dart@v1.3
@@ -16,8 +17,18 @@ jobs:
         run: dart pub get
       - name: Compile
         run: dart compile exe bin/dage.dart -o bin/${{fromJSON(matrix.build).exe}}
-      - name: Upload artifact
+      - name: Upload artifact for {{ fromJSON(matrix.build).os }}
         uses: actions/upload-artifact@v3
         with:
           name: ${{fromJSON(matrix.build).exe}}
           path: bin/${{fromJSON(matrix.build).exe}}
+  check:
+    name: Mark artifacts uploaded
+    needs: [ build ]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: LouisBrunner/checks-action@v2.0.0
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          name: Artifacts uploaded
+          conclusion: success
