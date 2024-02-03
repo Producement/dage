@@ -6,8 +6,11 @@ on:
   pull_request:
     branches:
       - main
+permissions:
+  pull-requests: write
 jobs:
   check:
+    name: Test
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -39,7 +42,7 @@ jobs:
         if: github.event_name == 'pull_request'
         with:
           lcov-file: ./coverage/lcov.info
-          github-token: ${{ secrets.PAT }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Test Report
         uses: dorny/test-reporter@v1

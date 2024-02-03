@@ -1,3 +1,7 @@
+## 1.0.9
+
+- Testing release flow mostly.
+
 ## 1.0.8
 
 - Fixes related to the testkit vectors.
