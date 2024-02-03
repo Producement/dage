@@ -49,7 +49,8 @@ void main() {
   test('encrypts and decrypts with passphrase', () async {
     final encrypted = encryptWithPassphrase(
         Stream.value(Uint8List.fromList('sinu ema'.codeUnits)),
-        passphraseProvider: ConstantPassphraseProvider());
+        passphraseProvider: ConstantPassphraseProvider(),
+        workFactor: 1);
     final decrypted = decryptWithPassphrase(encrypted,
         passphraseProvider: ConstantPassphraseProvider());
     final response = await decrypted.toList();

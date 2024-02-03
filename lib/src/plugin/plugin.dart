@@ -1,6 +1,7 @@
 library age.plugin;
 
 import 'package:cryptography/cryptography.dart';
+import 'package:logging/logging.dart';
 
 import '../keypair.dart';
 import '../passphrase_provider.dart';
@@ -15,6 +16,7 @@ class PluginNotFoundException implements Exception {
 }
 
 abstract class AgePlugin {
+  static final Logger _logger = Logger('AgePlugin');
   static final List<AgePlugin> _plugins =
       List.of([const X25519AgePlugin(), const ScryptPlugin()]);
 
@@ -35,7 +37,7 @@ abstract class AgePlugin {
 
   Future<AgeStanza?> createPassphraseStanza(
       List<int> symmetricFileKey, List<int> salt,
-      {PassphraseProvider passphraseProvider});
+      {PassphraseProvider passphraseProvider, int workFactor});
 
   static T firstPluginSync<T>(T? Function(AgePlugin plugin) func) {
     for (var plugin in _plugins) {
@@ -77,11 +79,15 @@ abstract class AgePlugin {
         plugin.createStanza(recipient, symmetricFileKey, ephemeralKeyPair));
   }
 
-  static Future<AgeStanza> passphraseStanzaCreate(List<int> symmetricFileKey,
-      List<int> salt, PassphraseProvider passphraseProvider) async {
+  static Future<AgeStanza> passphraseStanzaCreate(
+      List<int> symmetricFileKey,
+      List<int> salt,
+      PassphraseProvider passphraseProvider,
+      int workFactor) async {
+    _logger.fine('Creating stanza');
     return firstPlugin((plugin) => plugin.createPassphraseStanza(
         symmetricFileKey, salt,
-        passphraseProvider: passphraseProvider));
+        passphraseProvider: passphraseProvider, workFactor: workFactor));
   }
 
   static Future<AgeKeyPair> convertIdentityToKeyPair(

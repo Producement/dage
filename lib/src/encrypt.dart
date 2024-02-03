@@ -16,12 +16,12 @@ const chunkSize = 64 * 1024; //64KiB
 
 Stream<List<int>> encryptWithPassphrase(Stream<List<int>> payload,
     {AgeRandom random = const AgeRandom(),
-    PassphraseProvider passphraseProvider =
-        const PassphraseProvider()}) async* {
+    PassphraseProvider passphraseProvider = const PassphraseProvider(),
+    workFactor = -1}) async* {
   _logger.fine('Encrypting to a passphrase');
   final symmetricFileKey = random.bytes(16);
   final stanza = await AgePlugin.passphraseStanzaCreate(
-      symmetricFileKey, random.bytes(16), passphraseProvider);
+      symmetricFileKey, random.bytes(16), passphraseProvider, workFactor);
   final header = await AgeHeader.create([stanza], symmetricFileKey);
   final payloadNonce = random.bytes(16);
 

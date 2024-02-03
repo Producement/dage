@@ -73,8 +73,8 @@ class X25519AgePlugin extends AgePlugin {
   @override
   Future<AgeStanza?> createPassphraseStanza(
       List<int> symmetricFileKey, List<int> salt,
-      {PassphraseProvider passphraseProvider =
-          const PassphraseProvider()}) async {
+      {PassphraseProvider passphraseProvider = const PassphraseProvider(),
+      int workFactor = -1}) async {
     return null;
   }
 }

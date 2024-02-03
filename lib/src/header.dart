@@ -13,7 +13,7 @@ import 'stanza.dart';
 import 'stream.dart';
 
 class AgeHeader {
-  static final logger = Logger('AgeHeader');
+  static final _logger = Logger('AgeHeader');
   static const _version = 'age-encryption.org/v1';
   static const _macSeparator = '---';
   final List<AgeStanza> _stanzas;
@@ -29,7 +29,7 @@ class AgeHeader {
       List<AgeStanza> stanzas, Uint8List symmetricFileKey) async {
     final mac =
         await _calculateMac(await headerWithoutMac(stanzas), symmetricFileKey);
-    logger.fine('Calculated mac: $mac');
+    _logger.fine('Calculated mac: $mac');
     return AgeHeader._(stanzas, mac);
   }
 
@@ -44,7 +44,7 @@ class AgeHeader {
   static Future<AgeHeader> parse(String header,
       {PassphraseProvider passphraseProvider =
           const PassphraseProvider()}) async {
-    logger.finer('Header\n$header');
+    _logger.finer('Header\n$header');
     final headerLines = header.split('\n');
     final versionLine = headerLines[0];
     if (versionLine != _version) {
@@ -56,7 +56,7 @@ class AgeHeader {
     final stanzas = await Future.wait(stanzaLines.map((e) =>
         AgeStanza.parse(e.join('\n'), passphraseProvider: passphraseProvider)));
     final mac = headerLines.last.replaceFirst('$_macSeparator ', '');
-    logger.fine('Parsed mac: $mac');
+    _logger.fine('Parsed mac: $mac');
     return AgeHeader._(stanzas.toList(), mac);
   }
 
@@ -71,14 +71,14 @@ class AgeHeader {
       header.writeln(await stanza.serialize());
     }
     header.write(_macSeparator);
-    logger.fine('Header without mac\n${header.toString()}');
+    _logger.fine('Header without mac\n${header.toString()}');
     return header.toString();
   }
 
   Future<void> checkMac(Uint8List symmetricFileKey) async {
     final mac =
         await _calculateMac(await headerWithoutMac(_stanzas), symmetricFileKey);
-    logger.fine('Calculated mac: $mac, parsed mac: $_mac');
+    _logger.fine('Calculated mac: $mac, parsed mac: $_mac');
     if (mac != _mac) {
       throw Exception('Incorrect mac');
     }
@@ -90,6 +90,7 @@ class AgeHeader {
       hmac: Hmac(Sha256()),
       outputLength: 32,
     );
+    _logger.fine('Calculating MAC');
     final secretKeyData = SecretKeyData(symmetricFileKey);
     final macKey = await hkdfAlgorithm.deriveKey(
         secretKey: secretKeyData,
