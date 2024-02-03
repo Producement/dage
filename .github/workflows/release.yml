@@ -44,7 +44,9 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           pattern: dage-*
+      - run: ls -lhrt
       - name: Release
         uses: softprops/action-gh-release@v1
         with:
-          files: dage-*
+          fail_on_unmatched_files: true
+          files: dage-*/dage-*
