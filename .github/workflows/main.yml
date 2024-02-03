@@ -1,4 +1,4 @@
-name: Dart
+name: Test
 on:
   push:
     branches:
@@ -8,6 +8,9 @@ on:
       - main
 permissions:
   pull-requests: write
+  contents: read
+  actions: read
+  checks: write
 jobs:
   check:
     name: Test
