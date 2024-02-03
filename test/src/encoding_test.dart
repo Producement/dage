@@ -13,4 +13,14 @@ void main() {
   test('can encode bytes to raw base64', () async {
     expect(base64RawEncode('hello'.codeUnits), equals('aGVsbG8'));
   });
+
+  test('creates chunks from a list', () async {
+    expect(
+        chunk([1, 2, 3, 4, 5], 2),
+        equals([
+          [1, 2],
+          [3, 4],
+          [5]
+        ]));
+  });
 }
