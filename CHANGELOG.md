@@ -1,3 +1,7 @@
+## 1.0.10
+
+- Add support for armoring.
+
 ## 1.0.9
 
 - Testing release flow mostly.
