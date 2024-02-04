@@ -7,7 +7,7 @@ import 'package:collection/collection.dart';
 import 'package:cryptography/cryptography.dart';
 import 'package:logging/logging.dart';
 
-import 'plugin/encoding.dart';
+import 'encoding.dart';
 import 'passphrase_provider.dart';
 import 'stanza.dart';
 import 'stream.dart';

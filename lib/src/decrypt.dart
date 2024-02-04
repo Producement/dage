@@ -3,7 +3,9 @@ library age.src;
 import 'dart:typed_data';
 
 import 'package:async/async.dart';
+import 'package:collection/collection.dart';
 import 'package:cryptography/cryptography.dart';
+import 'package:dage/src/armor.dart';
 import 'package:dage/src/stream.dart';
 import 'package:logging/logging.dart';
 
@@ -15,6 +17,16 @@ import 'passphrase_provider.dart';
 final Logger _logger = Logger('AgeDecrypt');
 
 const _macSize = 16;
+
+Stream<List<int>> decryptArmored(
+    Stream<List<int>> content, List<AgeKeyPair> keyPairs,
+    {PassphraseProvider passphraseProvider =
+        const PassphraseProvider()}) async* {
+  final bytes = await content.toList();
+  yield* decrypt(
+      Stream.value(armorDecoder.convert(bytes.flattened.toList())), keyPairs,
+      passphraseProvider: passphraseProvider);
+}
 
 Stream<List<int>> decrypt(Stream<List<int>> content, List<AgeKeyPair> keyPairs,
     {PassphraseProvider passphraseProvider =
@@ -41,6 +53,15 @@ Stream<List<int>> decrypt(Stream<List<int>> content, List<AgeKeyPair> keyPairs,
   await header.checkMac(symmetricFileKey);
   yield* _decryptPayload(split.payload.stream,
       symmetricFileKey: symmetricFileKey);
+}
+
+Stream<List<int>> decryptArmoredWithPassphrase(Stream<List<int>> content,
+    {PassphraseProvider passphraseProvider =
+        const PassphraseProvider()}) async* {
+  final bytes = await content.toList();
+  yield* decryptWithPassphrase(
+      Stream.value(armorDecoder.convert(bytes.flattened.toList())),
+      passphraseProvider: passphraseProvider);
 }
 
 Stream<List<int>> decryptWithPassphrase(Stream<List<int>> content,

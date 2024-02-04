@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:args/args.dart';
+import 'package:collection/collection.dart';
 import 'package:dage/dage.dart';
 import 'package:logging/logging.dart';
 
@@ -33,21 +34,22 @@ void main(List<String> arguments) async {
         throw Exception('At least one recipient needed!');
       }
       if (isPassphraseEncryption) {
-        final encrypted = encryptWithPassphrase(readFromInput(results));
-        writeToOut(results, encrypted);
+        final encrypted = encryptWithPassphrase(await readFromInput(results));
+        await writeToOut(results, encrypted);
       } else {
-        final encrypted = encrypt(readFromInput(results), keyPairs.toList());
-        writeToOut(results, encrypted);
+        final encrypted =
+            encrypt(await readFromInput(results), keyPairs.toList());
+        await writeToOut(results, encrypted);
       }
     } else if (results['decrypt']) {
       final identityList = results['identity'] as List<String>;
       if (identityList.isNotEmpty) {
         final identities = await getIdentities(results);
-        final decrypted = decrypt(readFromInput(results), identities);
-        writeToOut(results, decrypted);
+        final decrypted = decrypt(await readFromInput(results), identities);
+        await writeToOut(results, decrypted);
       } else {
-        final decrypted = decryptWithPassphrase(readFromInput(results));
-        writeToOut(results, decrypted);
+        final decrypted = decryptWithPassphrase(await readFromInput(results));
+        await writeToOut(results, decrypted);
       }
     }
   } catch (e, stacktrace) {
@@ -66,21 +68,29 @@ Future<List<AgeKeyPair>> getIdentities(ArgResults results) async {
   return keyPairs.toList();
 }
 
-Stream<List<int>> readFromInput(ArgResults results) {
+Future<Stream<List<int>>> readFromInput(ArgResults results) async {
   if (results.rest.isNotEmpty) {
-    final fileName = results.rest.last;
-    return File(fileName).openRead();
+    final file = File(results.rest.last);
+    if (await isArmored(file)) {
+      final bytes = await file.openRead().toList();
+      return Stream.value(armorDecoder.convert(bytes.flattened.toList()));
+    }
+    return file.openRead();
   } else {
     return stdin;
   }
 }
 
-void writeToOut(ArgResults results, Stream<List<int>> bytes) {
+Future<void> writeToOut(ArgResults results, Stream<List<int>> bytes) async {
   final output = results['output'];
   if (output != null) {
-    File(output).openWrite().addStream(bytes);
+    if (results['armored']) {
+      final bytesList = await bytes.toList();
+      bytes = Stream.value(armorEncoder.convert(bytesList.flattened.toList()));
+    }
+    await File(output).openWrite().addStream(bytes);
   } else {
-    stdout.addStream(bytes);
+    await stdout.addStream(bytes);
   }
 }
 
@@ -103,10 +113,14 @@ ArgResults parseArguments(List<String> arguments) {
       abbr: 'r', help: 'Encrypt to the specified RECIPIENT. Can be repeated.');
   parser.addMultiOption('identity',
       abbr: 'i', help: 'Use the identity file at PATH. Can be repeated.');
+  parser.addFlag('armored',
+      abbr: 'a',
+      negatable: false,
+      help: 'Write the result as an armored file.');
 
   final results = parser.parse(arguments);
 
-  if (results['usage']) {
+  if (results['usage'] || results.arguments.isEmpty) {
     stdout.writeln(parser.usage);
     stdout.writeln('''
 

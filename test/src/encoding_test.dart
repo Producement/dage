@@ -1,4 +1,4 @@
-import 'package:dage/src/plugin/encoding.dart';
+import 'package:dage/src/encoding.dart';
 import 'package:test/test.dart';
 
 void main() {
@@ -16,7 +16,7 @@ void main() {
 
   test('creates chunks from a list', () async {
     expect(
-        chunk([1, 2, 3, 4, 5], 2),
+        chunked([1, 2, 3, 4, 5], 2),
         equals([
           [1, 2],
           [3, 4],
