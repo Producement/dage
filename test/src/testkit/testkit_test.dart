@@ -14,19 +14,29 @@ void main() async {
   });
   group('testkit', () {
     for (final vec in testVectors()) {
-      if (vec.armored) continue;
       if (vec.expect == Expect.success) {
         test('${vec.name} should succeed', () async {
           if (await vec.hasIdentities) {
-            final plaintext =
-                decrypt(Stream.value(vec.body), await vec.identities);
+            final Stream<List<int>> plaintext;
+            if (vec.armored) {
+              plaintext =
+                  decryptArmored(Stream.value(vec.body), await vec.identities);
+            } else {
+              plaintext = decrypt(Stream.value(vec.body), await vec.identities);
+            }
             final bytes = await plaintext.toList();
             expect(hex.encode(sha256.convert(List.from(bytes.flattened)).bytes),
                 vec.payload,
                 reason: vec.comment);
           } else {
-            final plaintext = decryptWithPassphrase(Stream.value(vec.body),
-                passphraseProvider: (await vec.passphrases).single);
+            final Stream<List<int>> plaintext;
+            if (vec.armored) {
+              plaintext = decryptArmoredWithPassphrase(Stream.value(vec.body),
+                  passphraseProvider: (await vec.passphrases).single);
+            } else {
+              plaintext = decryptWithPassphrase(Stream.value(vec.body),
+                  passphraseProvider: (await vec.passphrases).single);
+            }
             final bytes = await plaintext.toList();
             expect(hex.encode(sha256.convert(List.from(bytes.flattened)).bytes),
                 vec.payload,
@@ -36,17 +46,35 @@ void main() async {
       } else {
         test('${vec.name} should fail', () async {
           if (await vec.hasIdentities) {
-            await expectLater(
-                decrypt(Stream.value(vec.body), await vec.identities).toList(),
-                throwsException,
-                reason: vec.comment);
+            if (vec.armored) {
+              await expectLater(
+                  decryptArmored(Stream.value(vec.body), await vec.identities)
+                      .toList(),
+                  throwsException,
+                  reason: vec.comment);
+            } else {
+              await expectLater(
+                  decrypt(Stream.value(vec.body), await vec.identities)
+                      .toList(),
+                  throwsException,
+                  reason: vec.comment);
+            }
           } else {
-            await expectLater(
-                decryptWithPassphrase(Stream.value(vec.body),
-                        passphraseProvider: (await vec.passphrases).first)
-                    .toList(),
-                throwsException,
-                reason: vec.comment);
+            if (vec.armored) {
+              await expectLater(
+                  decryptArmoredWithPassphrase(Stream.value(vec.body),
+                          passphraseProvider: (await vec.passphrases).first)
+                      .toList(),
+                  throwsException,
+                  reason: vec.comment);
+            } else {
+              await expectLater(
+                  decryptWithPassphrase(Stream.value(vec.body),
+                          passphraseProvider: (await vec.passphrases).first)
+                      .toList(),
+                  throwsException,
+                  reason: vec.comment);
+            }
           }
         });
       }

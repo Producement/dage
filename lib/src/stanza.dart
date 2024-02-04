@@ -7,7 +7,7 @@ import 'package:cryptography/cryptography.dart';
 
 import 'keypair.dart';
 import 'passphrase_provider.dart';
-import 'plugin/encoding.dart';
+import 'encoding.dart';
 import 'plugin/plugin.dart';
 
 abstract class AgeStanza {

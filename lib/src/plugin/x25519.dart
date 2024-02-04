@@ -8,7 +8,7 @@ import 'package:logging/logging.dart';
 import '../keypair.dart';
 import '../passphrase_provider.dart';
 import '../stanza.dart';
-import 'encoding.dart';
+import '../encoding.dart';
 import 'plugin.dart';
 
 class X25519AgePlugin extends AgePlugin {
