@@ -41,7 +41,7 @@ jobs:
         run: dart test
 
       - name: Collect coverage
-        uses: romeovs/lcov-reporter-action@v0.3.1
+        uses: romeovs/lcov-reporter-action@v0.4.0
         if: github.event_name == 'pull_request'
         with:
           lcov-file: ./coverage/lcov.info
